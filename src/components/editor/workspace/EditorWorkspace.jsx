@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { CloudUpload, ExternalLink, Check, Copy, PanelLeftClose, PanelLeftOpen, LayoutDashboard } from 'lucide-react';
+import {
+  CloudUpload,
+  ExternalLink,
+  Check,
+  Copy,
+  PanelLeftClose,
+  PanelLeftOpen,
+  LayoutDashboard,
+  Menu,
+  X,
+} from 'lucide-react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { usePortfolio } from '../../../context/PortfolioContext';
 import { useAuth } from '../../../context/AuthContext';
@@ -8,9 +18,16 @@ import { savePortfolio, generateSlug, blankPortfolioData, defaultPortfolioData }
 import { isFirebaseConfigured } from '../../../services/firebase';
 import { savePortfolioToFirestore, loadPortfolioByUid } from '../../../services/firestore';
 import { getTheme, DEFAULT_THEME_ID, themeToEditorCssVars } from '../../../themes/themes';
-import LeftToolbar from './LeftToolbar';
+import LeftToolbar, { TABS } from './LeftToolbar';
 import PropertyPanel from './PropertyPanel';
 import CanvasPanel from './CanvasPanel';
+import ProfileSection from '../sections/ProfileSection';
+import EducationSection from '../sections/EducationSection';
+import ExperienceSection from '../sections/ExperienceSection';
+import ProjectsSection from '../sections/ProjectsSection';
+import SkillsSection from '../sections/SkillsSection';
+import ThemeSection from '../sections/ThemeSection';
+import SettingsSection from '../sections/SettingsSection';
 import Toast from '../../shell/Toast';
 import FolioVitaeLogo from '../../brand/Logo';
 
@@ -21,6 +38,7 @@ export default function EditorWorkspace() {
   const { portfolioData, dispatch } = usePortfolio();
   const [activeTab, setActiveTab] = useState('profile');
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [publishing, setPublishing] = useState(false);
   const [publishModal, setPublishModal] = useState(null);
@@ -193,19 +211,36 @@ export default function EditorWorkspace() {
         ...editorCssVars,
       }}
     >
-      {/* ── Adobe Spectrum Workspace Top Bar ── */}
+      {/* ── Mobile-First Responsive Top Bar ── */}
       <header
-        className="h-11 shrink-0 flex items-center justify-between px-3.5 select-none transition-colors duration-200"
+        className="h-12 shrink-0 flex items-center justify-between px-3 sm:px-4 select-none transition-colors duration-200 z-30 relative"
         style={{
           background: 'var(--pf-topbar-bg, #E4DCCF)',
           borderBottom: '1px solid var(--pf-border-color, #D2C6B4)',
         }}
       >
-        {/* Brand & App Title */}
-        <div className="flex items-center gap-3">
-          <Link to="/" className="group" title="Return to Home">
+        {/* Left Side: Mobile Hamburger + Folio Vitae Logo + Desktop Breadcrumbs */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          {/* Mobile Hamburger Menu Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((v) => !v)}
+            className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg transition-colors cursor-pointer"
+            style={{
+              background: 'var(--pf-card-bg, #FCFAF6)',
+              border: '1px solid var(--pf-border-color, #D8CEBE)',
+              color: 'var(--pf-text-primary, #1B2A1B)',
+            }}
+            aria-label={mobileMenuOpen ? 'Close editor menu' : 'Open editor menu'}
+            title="Open Editor Menu & Properties"
+          >
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+
+          {/* Brand Logo (Always visible, uncluttered) */}
+          <Link to="/" className="group shrink-0 flex items-center" title="Return to Home">
             <FolioVitaeLogo
-              size={24}
+              size={22}
               showText={true}
               textColor="var(--pf-text-primary, #1B2A1B)"
               accentColor="var(--pf-ui-accent, #447244)"
@@ -213,9 +248,10 @@ export default function EditorWorkspace() {
             />
           </Link>
 
+          {/* Dashboard Link (Desktop only) */}
           <Link
             to="/dashboard"
-            className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded border transition-all hover:scale-105"
+            className="hidden md:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded border transition-all hover:scale-105"
             style={{
               background: 'var(--pf-input-bg, #FAF7F1)',
               borderColor: 'var(--pf-border-color, #D8CEBE)',
@@ -227,8 +263,9 @@ export default function EditorWorkspace() {
             <span>Dashboard</span>
           </Link>
 
+          {/* Active Theme Info (Desktop only) */}
           <div
-            className="hidden sm:flex items-center gap-2 pl-2"
+            className="hidden lg:flex items-center gap-2 pl-2"
             style={{ borderLeft: '1px solid var(--pf-border-color, #D2C6B4)' }}
           >
             <span className="text-[11px]" style={{ color: 'var(--pf-text-muted, #6B7A6E)' }}>Theme:</span>
@@ -239,9 +276,9 @@ export default function EditorWorkspace() {
           </div>
         </div>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-2.5">
-          {/* Public Preview Link */}
+        {/* Right Side: Desktop Secondary Links + Compact Mobile Save Button */}
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          {/* Public Preview Link (Desktop only) */}
           <a
             href={`/${slug}`}
             target="_blank"
@@ -258,9 +295,9 @@ export default function EditorWorkspace() {
             <span>View Public Site</span>
           </a>
 
-          {/* Refined User Profile Status Badge */}
+          {/* User Profile Status Badge (Desktop only) */}
           <div
-            className="flex items-center gap-2 px-2.5 py-1 rounded-full border shadow-sm transition-all"
+            className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-full border shadow-sm transition-all"
             style={{
               background: 'var(--pf-input-bg, #FAF7F1)',
               borderColor: 'var(--pf-border-color, #D2C6B4)',
@@ -274,43 +311,46 @@ export default function EditorWorkspace() {
               className="text-[11.5px] font-semibold max-w-[130px] truncate"
               style={{ color: 'var(--pf-text-primary, #1B2A1B)' }}
             >
-              {user?.displayName || user?.email || 'Ashwell Sunil'}
+              {user?.displayName || user?.email || 'Active Session'}
             </span>
           </div>
 
-          {/* Primary Save & Publish */}
+          {/* Compact Save Button (Mobile: 'Save' / Desktop: 'Save & Publish') */}
           <button
             type="button"
             onClick={handlePublish}
             disabled={publishing}
-            className="spectrum-btn-primary h-7 px-3.5 text-[12px] font-bold rounded-full shadow-sm"
+            className="spectrum-btn-primary h-8 px-3 sm:px-3.5 text-xs font-bold rounded-full shadow-sm flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
           >
             <CloudUpload size={13} />
-            <span>{publishing ? 'Publishing…' : 'Save & Publish'}</span>
+            <span className="sm:hidden">{publishing ? 'Saving…' : 'Save'}</span>
+            <span className="hidden sm:inline">{publishing ? 'Publishing…' : 'Save & Publish'}</span>
           </button>
         </div>
       </header>
 
       {/* ── Main Workspace Body ── */}
       <div className="flex flex-1 min-h-0 relative overflow-hidden">
-        {/* Leftmost Tool Tab Navigation */}
-        <LeftToolbar
-          activeTab={activeTab}
-          onChange={(tab) => {
-            setActiveTab(tab);
-            if (collapsed) setCollapsed(false);
-          }}
-        />
+        {/* Desktop Leftmost Tool Tab Navigation (Hidden on Mobile) */}
+        <div className="hidden md:flex h-full shrink-0">
+          <LeftToolbar
+            activeTab={activeTab}
+            onChange={(tab) => {
+              setActiveTab(tab);
+              if (collapsed) setCollapsed(false);
+            }}
+          />
+        </div>
 
-        {/* Collapsible Property Panel Wrapper */}
-        <div className="relative flex shrink-0 h-full">
+        {/* Desktop Collapsible Property Panel Wrapper (Hidden on Mobile) */}
+        <div className="hidden md:flex relative shrink-0 h-full">
           <PropertyPanel
             activeTab={activeTab}
             collapsed={collapsed}
             onPublish={handlePublish}
           />
 
-          {/* Smooth Two-Way Collapse/Expand Toggle Button (Always visible on divider border) */}
+          {/* Two-Way Desktop Collapse/Expand Toggle Button */}
           <button
             type="button"
             onClick={() => setCollapsed((v) => !v)}
@@ -330,9 +370,134 @@ export default function EditorWorkspace() {
           </button>
         </div>
 
-        {/* Live Canvas Preview Panel */}
+        {/* Live Canvas Preview Panel (Full-width on Mobile) */}
         <CanvasPanel />
       </div>
+
+      {/* ── Mobile Slide-Over Drawer (Properties & Navigation) ── */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          {/* Drawer Panel */}
+          <div
+            className="relative w-[90vw] max-w-sm h-full flex flex-col shadow-2xl z-10 overflow-hidden"
+            style={{
+              background: 'var(--pf-panel-bg, #E4ECE4)',
+              borderRight: '1px solid var(--pf-border-color, #D8CEBE)',
+            }}
+          >
+            {/* Drawer Header */}
+            <div
+              className="h-12 px-4 shrink-0 flex items-center justify-between border-b"
+              style={{
+                background: 'var(--pf-topbar-bg, #DDEADD)',
+                borderColor: 'var(--pf-border-color, #D8CEBE)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <FolioVitaeLogo size={18} textColor="var(--pf-text-primary, #1B2A1B)" accentColor="var(--pf-ui-accent, #447244)" />
+                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--pf-text-primary, #1B2A1B)' }}>
+                  Editor Workspace
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[#4A584A] hover:bg-black/10 transition-colors cursor-pointer"
+                aria-label="Close menu"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Mobile Navigation Tabs */}
+            <div
+              className="px-2 py-2 flex items-center gap-1.5 overflow-x-auto border-b shrink-0 spectrum-scroll"
+              style={{
+                background: 'var(--pf-toolbar-bg, #2a382a)',
+                borderColor: 'var(--pf-border-color, #3a4a3a)',
+              }}
+            >
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                const active = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer"
+                    style={{
+                      background: active ? 'var(--pf-ui-accent, #447244)' : 'transparent',
+                      color: active ? '#ffffff' : '#D1D5DB',
+                    }}
+                  >
+                    <Icon size={14} />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Quick Links Row inside Mobile Menu */}
+            <div
+              className="px-3 py-2 flex items-center justify-between text-xs border-b shrink-0"
+              style={{
+                background: 'var(--pf-topbar-bg, #DDEADD)',
+                borderColor: 'var(--pf-border-color, #D8CEBE)',
+              }}
+            >
+              <Link
+                to="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-1 font-semibold text-[#447244] hover:underline"
+              >
+                <LayoutDashboard size={13} />
+                <span>Dashboard</span>
+              </Link>
+              <a
+                href={`/${slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 font-semibold text-[#447244] hover:underline"
+              >
+                <ExternalLink size={13} />
+                <span>View Public Page</span>
+              </a>
+            </div>
+
+            {/* Mobile Property Panel Content */}
+            <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-3.5 spectrum-scroll">
+              {activeTab === 'profile' && (
+                <>
+                  <ProfileSection />
+                  <EducationSection />
+                </>
+              )}
+              {activeTab === 'work' && (
+                <>
+                  <ExperienceSection />
+                  <ProjectsSection />
+                </>
+              )}
+              {activeTab === 'skills' && <SkillsSection />}
+              {activeTab === 'theme' && <ThemeSection />}
+              {activeTab === 'settings' && (
+                <>
+                  <ThemeSection />
+                  <SettingsSection onPublish={handlePublish} />
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Publish Success Modal ── */}
       {publishModal && (

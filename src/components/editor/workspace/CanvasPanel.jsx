@@ -8,24 +8,27 @@ export default function CanvasPanel() {
 
   return (
     <main
-      className="flex-1 min-w-0 h-full relative overflow-hidden transition-colors duration-200"
-      style={{ background: 'var(--pf-editor-bg, #1e1e1e)' }}
+      className="flex-1 w-full min-w-0 h-full relative overflow-hidden transition-colors duration-200"
+      style={{ background: 'var(--pf-editor-bg, #EDE7DC)' }}
       aria-label="Canvas Live Preview"
     >
       {/* Subtle technical canvas grid */}
       <div
         className="absolute inset-0 pointer-events-none opacity-25"
         style={{
-          backgroundImage: `linear-gradient(var(--pf-border-color, #2a2a2a) 1px, transparent 1px), linear-gradient(90deg, var(--pf-border-color, #2a2a2a) 1px, transparent 1px)`,
+          backgroundImage: `linear-gradient(var(--pf-border-color, #D8CEBE) 1px, transparent 1px), linear-gradient(90deg, var(--pf-border-color, #D8CEBE) 1px, transparent 1px)`,
           backgroundSize: '24px 24px',
         }}
       />
 
-      {/* Scrollable Live Document Preview Area */}
-      <div className="relative h-full overflow-y-auto spectrum-scroll">
+      {/* Scrollable Live Document Preview Area with appropriate mobile padding */}
+      <div className="relative h-full w-full overflow-y-auto spectrum-scroll p-2.5 sm:p-5 md:p-8 flex justify-center">
         <div
-          className="min-h-full transition-colors duration-200"
-          style={{ background: theme.colors.pageBg }}
+          className="w-full max-w-4xl min-h-full rounded-xl sm:rounded-2xl shadow-xl transition-all duration-200 overflow-hidden"
+          style={{
+            background: theme.colors.pageBg,
+            border: '1px solid var(--pf-border-color, #D8CEBE)',
+          }}
         >
           <PortfolioDocument
             key={`doc-${portfolioData?.themeId || 'default'}-${portfolioData?.layout || 'classic'}`}

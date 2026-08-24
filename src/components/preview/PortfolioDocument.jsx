@@ -278,7 +278,7 @@ export default function PortfolioDocument({ data: propData }) {
         <div className="relative z-[2]">
           {/* Hero Header */}
           <header
-            className="relative px-10 pt-16 pb-14 transition-colors duration-200 z-[2]"
+            className="relative px-5 sm:px-8 md:px-10 pt-8 sm:pt-14 pb-8 sm:pb-14 transition-colors duration-200 z-[2]"
             style={{
               borderBottom: `1px solid ${t.border}`,
             }}
@@ -394,7 +394,7 @@ export default function PortfolioDocument({ data: propData }) {
           </header>
 
           {/* Body Content */}
-          <div className="relative px-10 py-12 space-y-12 z-[2]">
+          <div className="relative px-4 sm:px-8 md:px-10 py-6 sm:py-12 space-y-8 sm:space-y-12 z-[2]">
             {profile.about && (
               <section aria-labelledby="pf-about" className="relative z-[2]">
                 <SectionHeading title="About" id="pf-about" theme={theme} delay={100} />
@@ -547,7 +547,7 @@ export default function PortfolioDocument({ data: propData }) {
           LAYOUT 2: MINIMAL CENTERED (Streamlined Single Column Flow)
       ══════════════════════════════════════════════════════════════════════ */}
       {layout === 'minimal' && (
-        <div className="max-w-4xl mx-auto px-8 py-20 space-y-16 relative z-[2]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-16 md:py-20 space-y-10 sm:space-y-16 relative z-[2]">
           {/* Centered Hero */}
           <header className="flex flex-col items-center text-center space-y-5 relative z-[2]">
             {profile.imageUrl && (
@@ -686,10 +686,10 @@ export default function PortfolioDocument({ data: propData }) {
           LAYOUT 3: BENTO GRID (Dynamic Interactive Asymmetric Layout)
       ══════════════════════════════════════════════════════════════════════ */}
       {layout === 'bento' && (
-        <div className="max-w-6xl mx-auto px-8 py-14 space-y-6 relative z-[2]">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 md:px-8 py-6 sm:py-12 md:py-14 space-y-4 sm:space-y-6 relative z-[2]">
           {/* Bento Header Anchor Card (Spans Full) */}
           <div
-            className={`p-8 rounded-3xl backdrop-blur-md transition-all relative overflow-hidden ${
+            className={`p-5 sm:p-7 md:p-9 rounded-2xl sm:rounded-3xl backdrop-blur-md transition-all relative overflow-hidden ${
               isAvatarCenter
                 ? 'flex flex-col items-center text-center gap-6'
                 : isAvatarLeft
@@ -699,7 +699,6 @@ export default function PortfolioDocument({ data: propData }) {
             style={{
               ...cardStyle,
               background: t.cardBg,
-              padding: '36px',
             }}
           >
             {/* Bento Header Inset Theme Watermark */}

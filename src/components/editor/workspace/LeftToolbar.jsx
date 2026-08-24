@@ -1,6 +1,6 @@
 import { User, Briefcase, Code2, Palette, Settings } from 'lucide-react';
 
-const TABS = [
+export const TABS = [
   { id: 'profile', label: 'Identity', icon: User },
   { id: 'work', label: 'Work & Projects', icon: Briefcase },
   { id: 'skills', label: 'Skills & Certs', icon: Code2 },
