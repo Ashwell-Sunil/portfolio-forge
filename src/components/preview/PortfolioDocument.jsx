@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { usePortfolioOptional } from '../../context/PortfolioContext';
 import { getTheme, themeToCssVars } from '../../themes/themes';
 import { generateSlug } from '../../services/storage';
-import { normalizeImageUrl } from '../../utils/urlHelper';
+import { normalizeImageUrl, formatExternalUrl } from '../../utils/urlHelper';
 import ThemeWatermark from './ThemeWatermark';
 
 // ─── SVG Icons ─────────────────────────────────────────────────────────────
@@ -43,6 +43,26 @@ function parseResponsibilities(text) {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => line.replace(/^[•\-\*]\s*/, ''));
+}
+
+function formatDegree(edu) {
+  if (edu.degree && edu.major && !edu.degree.toLowerCase().includes(edu.major.toLowerCase())) {
+    return `${edu.degree} · ${edu.major}`;
+  }
+  return edu.degree || edu.major || 'Degree';
+}
+
+function formatEduDates(edu) {
+  const start = edu.startDate || edu.startYear;
+  const end = edu.endDate || edu.endYear || (edu.current ? 'Present' : '');
+  return [start, end].filter(Boolean).join(' – ');
+}
+
+function getTechList(stack) {
+  if (!stack) return [];
+  if (Array.isArray(stack)) return stack.map((s) => String(s).trim()).filter(Boolean);
+  if (typeof stack === 'string') return stack.split(',').map((s) => s.trim()).filter(Boolean);
+  return [];
 }
 
 // ─── Media Lightbox Component ──────────────────────────────────────────────
@@ -205,10 +225,12 @@ export default function PortfolioDocument({ data: propData }) {
 
   const cssVars = themeToCssVars(theme);
 
-  const socialLink = (href, icon, label) =>
-    href ? (
+  const socialLink = (href, icon, label) => {
+    if (!href) return null;
+    const formattedUrl = href.startsWith('mailto:') ? href : formatExternalUrl(href);
+    return (
       <a
-        href={href}
+        href={formattedUrl}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={label}
@@ -224,7 +246,8 @@ export default function PortfolioDocument({ data: propData }) {
         {icon}
         <span className="truncate max-w-[150px]">{label}</span>
       </a>
-    ) : null;
+    );
+  };
 
   const avatarPosition = profile.imagePosition || 'right';
   const isAvatarLeft = avatarPosition === 'left';
@@ -346,7 +369,7 @@ export default function PortfolioDocument({ data: propData }) {
                   {socialLink(profile.twitter, <TwitterIcon />, 'Twitter')}
                   {profile.resumeLink && (
                     <a
-                      href={profile.resumeLink}
+                      href={formatExternalUrl(profile.resumeLink)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all duration-150 hover:scale-105 shadow-sm"
@@ -406,7 +429,7 @@ export default function PortfolioDocument({ data: propData }) {
               </section>
             )}
 
-            {/* Experience & Education */}
+            {/* Experience */}
             {experience.length > 0 && (
               <section aria-labelledby="pf-exp" className="relative z-[2]">
                 <SectionHeading title="Experience" id="pf-exp" theme={theme} delay={150} />
@@ -442,55 +465,98 @@ export default function PortfolioDocument({ data: propData }) {
               </section>
             )}
 
+            {/* Education */}
+            {education.length > 0 && (
+              <section aria-labelledby="pf-edu" className="relative z-[2]">
+                <SectionHeading title="Education" id="pf-edu" theme={theme} delay={175} />
+                <div className="space-y-4">
+                  {education.map((edu) => {
+                    const degreeText = formatDegree(edu);
+                    const dates = formatEduDates(edu);
+
+                    return (
+                      <div key={edu.id} style={{ ...cardStyle, borderLeft: `4px solid ${t.accent}` }}>
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                          <div>
+                            <h3 style={{ fontFamily: displayFont, fontSize: '1.12rem', fontWeight: 600, color: t.text, margin: '0 0 3px' }}>
+                              {degreeText}
+                            </h3>
+                            <p style={{ fontSize: '0.95rem', fontWeight: 600, color: t.accent, margin: '0 0 4px' }}>
+                              {edu.institution || 'Institution'}
+                            </p>
+                            {edu.gpa && (
+                              <p style={{ fontSize: '0.82rem', color: t.text3, margin: 0 }}>
+                                <span style={{ fontWeight: 600, color: t.text2 }}>GPA:</span> {edu.gpa}
+                              </p>
+                            )}
+                          </div>
+                          {dates && (
+                            <span style={{ fontSize: '0.82rem', fontWeight: 600, padding: '3px 10px', borderRadius: '6px', background: t.badgeBg, color: t.badgeText, whiteSpace: 'nowrap' }}>
+                              {dates}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
             {/* Projects */}
             {projects.length > 0 && (
               <section aria-labelledby="pf-proj" className="relative z-[2]">
                 <SectionHeading title="Projects" id="pf-proj" theme={theme} delay={200} />
                 <div className="pf-masonry">
-                  {projects.map((proj) => (
-                    <article key={proj.id} className="pf-masonry-item" style={{ ...cardStyle }}>
-                      {proj.imageUrl && (
-                        <button
-                          type="button"
-                          onClick={() => openGallery(normalizeImageUrl(proj.imageUrl))}
-                          className="block w-full mb-3.5 overflow-hidden rounded-xl group"
-                          style={{ border: `1px solid ${t.border}`, padding: 0, cursor: 'zoom-in' }}
-                        >
-                          <img
-                            src={normalizeImageUrl(proj.imageUrl)}
-                            alt={proj.title || 'Project screenshot'}
-                            className="w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            style={{ maxHeight: 230 }}
-                          />
-                        </button>
-                      )}
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 style={{ fontFamily: displayFont, fontSize: '1.1rem', fontWeight: 600, color: t.text, margin: 0 }}>
-                          {proj.title || 'Project Title'}
-                        </h3>
-                        {proj.featured && (
-                          <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '3px 9px', borderRadius: '20px', background: t.tag.bg, color: t.tag.text }}>
-                            ★ Featured
-                          </span>
+                  {projects.map((proj) => {
+                    const stackList = getTechList(proj.techStack);
+                    const projLink = proj.link ? formatExternalUrl(proj.link) : null;
+
+                    return (
+                      <article key={proj.id} className="pf-masonry-item" style={{ ...cardStyle }}>
+                        {proj.imageUrl && (
+                          <button
+                            type="button"
+                            onClick={() => openGallery(normalizeImageUrl(proj.imageUrl))}
+                            className="block w-full mb-3.5 overflow-hidden rounded-xl group"
+                            style={{ border: `1px solid ${t.border}`, padding: 0, cursor: 'zoom-in' }}
+                          >
+                            <img
+                              src={normalizeImageUrl(proj.imageUrl)}
+                              alt={proj.title || 'Project screenshot'}
+                              className="w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              style={{ maxHeight: 230 }}
+                            />
+                          </button>
                         )}
-                      </div>
-                      {proj.description && <p style={{ fontSize: '0.92rem', lineHeight: '1.7', color: t.text2, marginBottom: '14px' }}>{proj.description}</p>}
-                      {proj.techStack?.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mb-3.5">
-                          {proj.techStack.map((tech) => (
-                            <span key={tech} className="backdrop-blur-sm" style={{ fontSize: '0.78rem', padding: '3px 10px', borderRadius: '20px', background: t.techTag.bg, color: t.techTag.text, border: `1px solid ${t.techTag.border}` }}>
-                              {tech}
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 style={{ fontFamily: displayFont, fontSize: '1.1rem', fontWeight: 600, color: t.text, margin: 0 }}>
+                            {proj.title || 'Project Title'}
+                          </h3>
+                          {proj.featured && (
+                            <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '3px 9px', borderRadius: '20px', background: t.tag.bg, color: t.tag.text }}>
+                              ★ Featured
                             </span>
-                          ))}
+                          )}
                         </div>
-                      )}
-                      {proj.link && (
-                        <a href={proj.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-semibold text-sm" style={{ color: t.accent, textDecoration: 'none' }}>
-                          <LinkIcon /><span>View Project →</span>
-                        </a>
-                      )}
-                    </article>
-                  ))}
+                        {proj.description && <p style={{ fontSize: '0.92rem', lineHeight: '1.7', color: t.text2, marginBottom: '14px' }}>{proj.description}</p>}
+                        {stackList.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mb-3.5">
+                            {stackList.map((tech) => (
+                              <span key={tech} className="backdrop-blur-sm" style={{ fontSize: '0.78rem', padding: '3px 10px', borderRadius: '20px', background: t.techTag?.bg || t.tag.bg, color: t.techTag?.text || t.tag.text, border: `1px solid ${t.techTag?.border || t.tag.border}` }}>
+                                {tech}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {projLink && (
+                          <a href={projLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-semibold text-sm" style={{ color: t.accent, textDecoration: 'none' }}>
+                            <LinkIcon /><span>View Project →</span>
+                          </a>
+                        )}
+                      </article>
+                    );
+                  })}
                 </div>
               </section>
             )}
@@ -515,6 +581,9 @@ export default function PortfolioDocument({ data: propData }) {
                 <div className="space-y-3.5">
                   {certifications.map((cert) => {
                     const media = cert.imageUrl || cert.fileUrl;
+                    const certYear = cert.year || cert.date || '';
+                    const certLink = cert.link || cert.fileUrl ? formatExternalUrl(cert.link || cert.fileUrl) : null;
+
                     return (
                       <div key={cert.id} className="flex items-center justify-between gap-4" style={{ ...cardStyle, padding: '16px 20px' }}>
                         <div className="flex items-center gap-3.5 min-w-0">
@@ -525,12 +594,20 @@ export default function PortfolioDocument({ data: propData }) {
                           )}
                           <div>
                             <p style={{ fontWeight: 600, color: t.text, fontSize: '0.98rem', margin: '0 0 2px' }}>{cert.name || 'Certification'}</p>
-                            <p style={{ fontSize: '0.84rem', color: t.text3, margin: 0 }}>{cert.issuer}</p>
+                            <div className="flex items-center gap-2 flex-wrap text-[13px]">
+                              {cert.issuer && <span style={{ color: t.text3 }}>{cert.issuer}</span>}
+                              {cert.issuer && certYear && <span style={{ color: t.text3 }}>·</span>}
+                              {certYear && (
+                                <span style={{ fontWeight: 600, color: t.accent }}>
+                                  {certYear}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                        {cert.link && (
-                          <a href={cert.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs font-semibold" style={{ color: t.accent, textDecoration: 'none' }}>
-                            <LinkIcon /><span>Verify</span>
+                        {certLink && (
+                          <a href={certLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs font-semibold shrink-0" style={{ color: t.accent, textDecoration: 'none' }}>
+                            <LinkIcon /><span>{cert.fileUrl ? 'View' : 'Verify'}</span>
                           </a>
                         )}
                       </div>
@@ -598,7 +675,7 @@ export default function PortfolioDocument({ data: propData }) {
               {socialLink(profile.twitter, <TwitterIcon />, 'Twitter')}
               {profile.resumeLink && (
                 <a
-                  href={profile.resumeLink}
+                  href={formatExternalUrl(profile.resumeLink)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold shadow-sm hover:scale-105 transition-transform"
@@ -619,49 +696,127 @@ export default function PortfolioDocument({ data: propData }) {
             </div>
           )}
 
+          {/* Experience in Minimal */}
+          {experience.length > 0 && (
+            <section className="relative z-[2]">
+              <SectionHeading title="Experience" id="min-exp" theme={theme} centered />
+              <div className="space-y-4">
+                {experience.map((exp) => (
+                  <div key={exp.id} style={{ ...cardStyle, textAlign: 'left' }}>
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+                      <div>
+                        <h3 style={{ fontFamily: displayFont, fontSize: '1.15rem', fontWeight: 600, color: t.text, margin: '0 0 3px' }}>
+                          {exp.role || 'Role'}
+                        </h3>
+                        <p style={{ fontSize: '0.95rem', fontWeight: 600, color: t.accent, margin: 0 }}>
+                          {exp.company || 'Company'}
+                        </p>
+                      </div>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 600, padding: '3px 10px', borderRadius: '6px', background: t.badgeBg, color: t.badgeText, whiteSpace: 'nowrap' }}>
+                        {[exp.startDate, exp.endDate || (exp.current ? 'Present' : '')].filter(Boolean).join(' – ')}
+                      </span>
+                    </div>
+                    {exp.responsibilities && (
+                      <ul className="space-y-1 mt-3 pl-0 list-none text-sm" style={{ color: t.text2 }}>
+                        {parseResponsibilities(exp.responsibilities).map((line, j) => (
+                          <li key={j} className="flex items-start gap-2">
+                            <span style={{ color: t.accent }}>▸</span>
+                            <span>{line}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Education in Minimal */}
+          {education.length > 0 && (
+            <section className="relative z-[2]">
+              <SectionHeading title="Education" id="min-edu" theme={theme} centered />
+              <div className="space-y-4">
+                {education.map((edu) => {
+                  const degreeText = formatDegree(edu);
+                  const dates = formatEduDates(edu);
+                  return (
+                    <div key={edu.id} style={{ ...cardStyle, textAlign: 'left' }}>
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                        <div>
+                          <h3 style={{ fontFamily: displayFont, fontSize: '1.12rem', fontWeight: 600, color: t.text, margin: '0 0 3px' }}>
+                            {degreeText}
+                          </h3>
+                          <p style={{ fontSize: '0.95rem', fontWeight: 600, color: t.accent, margin: '0 0 4px' }}>
+                            {edu.institution || 'Institution'}
+                          </p>
+                          {edu.gpa && (
+                            <p style={{ fontSize: '0.82rem', color: t.text3, margin: 0 }}>
+                              <span style={{ fontWeight: 600, color: t.text2 }}>GPA:</span> {edu.gpa}
+                            </p>
+                          )}
+                        </div>
+                        {dates && (
+                          <span style={{ fontSize: '0.82rem', fontWeight: 600, padding: '3px 10px', borderRadius: '6px', background: t.badgeBg, color: t.badgeText, whiteSpace: 'nowrap' }}>
+                            {dates}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
           {/* Projects Single Column */}
           {projects.length > 0 && (
             <section className="relative z-[2]">
               <SectionHeading title="Featured Work" id="min-proj" theme={theme} centered />
               <div className="space-y-8">
-                {projects.map((proj) => (
-                  <article key={proj.id} style={{ ...cardStyle }}>
-                    {proj.imageUrl && (
-                      <button
-                        type="button"
-                        onClick={() => openGallery(normalizeImageUrl(proj.imageUrl))}
-                        className="block w-full mb-4 overflow-hidden rounded-xl"
-                        style={{ border: `1px solid ${t.border}`, padding: 0, cursor: 'zoom-in' }}
-                      >
-                        <img
-                          src={normalizeImageUrl(proj.imageUrl)}
-                          alt={proj.title}
-                          className="w-full object-cover max-h-80 hover:scale-102 transition-transform duration-300"
-                        />
-                      </button>
-                    )}
-                    <h3 style={{ fontFamily: displayFont, fontSize: '1.25rem', fontWeight: 600, color: t.text, margin: '0 0 6px' }}>
-                      {proj.title}
-                    </h3>
-                    <p style={{ fontSize: '0.98rem', lineHeight: '1.7', color: t.text2, marginBottom: '14px' }}>
-                      {proj.description}
-                    </p>
-                    {proj.techStack?.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mb-4">
-                        {proj.techStack.map((tech) => (
-                          <span key={tech} className="backdrop-blur-sm" style={{ fontSize: '0.8rem', padding: '3px 12px', borderRadius: '20px', background: t.techTag.bg, color: t.techTag.text, border: `1px solid ${t.techTag.border}` }}>
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {proj.link && (
-                      <a href={proj.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-semibold text-sm" style={{ color: t.accent, textDecoration: 'none' }}>
-                        <LinkIcon /><span>View Project →</span>
-                      </a>
-                    )}
-                  </article>
-                ))}
+                {projects.map((proj) => {
+                  const stackList = getTechList(proj.techStack);
+                  const projLink = proj.link ? formatExternalUrl(proj.link) : null;
+
+                  return (
+                    <article key={proj.id} style={{ ...cardStyle, textAlign: 'left' }}>
+                      {proj.imageUrl && (
+                        <button
+                          type="button"
+                          onClick={() => openGallery(normalizeImageUrl(proj.imageUrl))}
+                          className="block w-full mb-4 overflow-hidden rounded-xl"
+                          style={{ border: `1px solid ${t.border}`, padding: 0, cursor: 'zoom-in' }}
+                        >
+                          <img
+                            src={normalizeImageUrl(proj.imageUrl)}
+                            alt={proj.title}
+                            className="w-full object-cover max-h-80 hover:scale-102 transition-transform duration-300"
+                          />
+                        </button>
+                      )}
+                      <h3 style={{ fontFamily: displayFont, fontSize: '1.25rem', fontWeight: 600, color: t.text, margin: '0 0 6px' }}>
+                        {proj.title}
+                      </h3>
+                      <p style={{ fontSize: '0.98rem', lineHeight: '1.7', color: t.text2, marginBottom: '14px' }}>
+                        {proj.description}
+                      </p>
+                      {stackList.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-4">
+                          {stackList.map((tech) => (
+                            <span key={tech} className="backdrop-blur-sm" style={{ fontSize: '0.8rem', padding: '3px 12px', borderRadius: '20px', background: t.techTag?.bg || t.tag.bg, color: t.techTag?.text || t.tag.text, border: `1px solid ${t.techTag?.border || t.tag.border}` }}>
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {projLink && (
+                        <a href={projLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-semibold text-sm" style={{ color: t.accent, textDecoration: 'none' }}>
+                          <LinkIcon /><span>View Project →</span>
+                        </a>
+                      )}
+                    </article>
+                  );
+                })}
               </div>
             </section>
           )}
@@ -676,6 +831,44 @@ export default function PortfolioDocument({ data: propData }) {
                     {skill}
                   </span>
                 ))}
+              </div>
+            </section>
+          )}
+
+          {/* Certifications in Minimal */}
+          {certifications.length > 0 && (
+            <section className="relative z-[2]">
+              <SectionHeading title="Certifications" id="min-certs" theme={theme} centered />
+              <div className="space-y-3.5">
+                {certifications.map((cert) => {
+                  const media = cert.imageUrl || cert.fileUrl;
+                  const certYear = cert.year || cert.date || '';
+                  const certLink = cert.link || cert.fileUrl ? formatExternalUrl(cert.link || cert.fileUrl) : null;
+                  return (
+                    <div key={cert.id} className="flex items-center justify-between gap-4 text-left" style={{ ...cardStyle, padding: '16px 20px' }}>
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        {media && (
+                          <button type="button" onClick={() => openGallery(normalizeImageUrl(media))} className="shrink-0" style={{ padding: 0, border: 0, background: 'transparent', cursor: 'zoom-in' }}>
+                            <img src={normalizeImageUrl(media)} alt={cert.name || 'Certificate'} style={{ width: 44, height: 44, objectFit: 'cover', borderRadius: 8, border: `1px solid ${t.border}` }} />
+                          </button>
+                        )}
+                        <div>
+                          <p style={{ fontWeight: 600, color: t.text, fontSize: '0.98rem', margin: '0 0 2px' }}>{cert.name || 'Certification'}</p>
+                          <div className="flex items-center gap-2 flex-wrap text-[13px]">
+                            {cert.issuer && <span style={{ color: t.text3 }}>{cert.issuer}</span>}
+                            {cert.issuer && certYear && <span style={{ color: t.text3 }}>·</span>}
+                            {certYear && <span style={{ fontWeight: 600, color: t.accent }}>{certYear}</span>}
+                          </div>
+                        </div>
+                      </div>
+                      {certLink && (
+                        <a href={certLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs font-semibold shrink-0" style={{ color: t.accent, textDecoration: 'none' }}>
+                          <LinkIcon /><span>{cert.fileUrl ? 'View' : 'Verify'}</span>
+                        </a>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}
@@ -770,9 +963,10 @@ export default function PortfolioDocument({ data: propData }) {
                 {socialLink(`mailto:${profile.email}`, <MailIcon />, profile.email)}
                 {socialLink(profile.github, <GithubIcon />, 'GitHub')}
                 {socialLink(profile.linkedin, <LinkedInIcon />, 'LinkedIn')}
+                {socialLink(profile.twitter, <TwitterIcon />, 'Twitter')}
                 {profile.resumeLink && (
                   <a
-                    href={profile.resumeLink}
+                    href={formatExternalUrl(profile.resumeLink)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold shadow-sm hover:scale-105 transition-transform"
@@ -817,36 +1011,70 @@ export default function PortfolioDocument({ data: propData }) {
               <div className="md:col-span-2 space-y-4" style={{ ...cardStyle }}>
                 <SectionHeading title="Featured Projects" id="bento-proj" theme={theme} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {projects.map((proj) => (
-                    <div
-                      key={proj.id}
-                      className="p-4 rounded-xl transition-all duration-200"
-                      style={{
-                        background: 'rgba(255,255,255,0.45)',
-                        border: `1px solid ${t.border}`,
-                      }}
-                    >
-                      {proj.imageUrl && (
-                        <img
-                          src={normalizeImageUrl(proj.imageUrl)}
-                          alt={proj.title}
-                          className="w-full h-32 object-cover rounded-lg mb-2.5 cursor-pointer"
-                          onClick={() => openGallery(normalizeImageUrl(proj.imageUrl))}
-                        />
-                      )}
-                      <h4 style={{ fontFamily: displayFont, fontWeight: 700, fontSize: '1rem', color: t.text, margin: '0 0 4px' }}>
-                        {proj.title}
-                      </h4>
-                      <p style={{ fontSize: '0.86rem', color: t.text2, lineHeight: '1.6', margin: '0 0 8px' }}>
-                        {proj.description}
-                      </p>
-                      {proj.link && (
-                        <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-xs font-bold" style={{ color: t.accent, textDecoration: 'none' }}>
-                          View Project →
-                        </a>
-                      )}
-                    </div>
-                  ))}
+                  {projects.map((proj) => {
+                    const stackList = getTechList(proj.techStack);
+                    const projLink = proj.link ? formatExternalUrl(proj.link) : null;
+
+                    return (
+                      <div
+                        key={proj.id}
+                        className="p-4 rounded-xl transition-all duration-200 flex flex-col justify-between"
+                        style={{
+                          background: 'rgba(255,255,255,0.45)',
+                          border: `1px solid ${t.border}`,
+                        }}
+                      >
+                        <div>
+                          {proj.imageUrl && (
+                            <img
+                              src={normalizeImageUrl(proj.imageUrl)}
+                              alt={proj.title}
+                              className="w-full h-32 object-cover rounded-lg mb-2.5 cursor-pointer"
+                              onClick={() => openGallery(normalizeImageUrl(proj.imageUrl))}
+                            />
+                          )}
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <h4 style={{ fontFamily: displayFont, fontWeight: 700, fontSize: '1rem', color: t.text, margin: 0 }}>
+                              {proj.title}
+                            </h4>
+                            {proj.featured && (
+                              <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', borderRadius: '12px', background: t.tag.bg, color: t.tag.text, border: `1px solid ${t.tag.border}` }}>
+                                ★
+                              </span>
+                            )}
+                          </div>
+                          <p style={{ fontSize: '0.86rem', color: t.text2, lineHeight: '1.6', margin: '0 0 10px' }}>
+                            {proj.description}
+                          </p>
+                          {stackList.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mb-3">
+                              {stackList.map((tech) => (
+                                <span
+                                  key={tech}
+                                  className="backdrop-blur-sm"
+                                  style={{
+                                    fontSize: '0.74rem',
+                                    padding: '2px 8px',
+                                    borderRadius: '16px',
+                                    background: t.techTag?.bg || t.tag.bg,
+                                    color: t.techTag?.text || t.tag.text,
+                                    border: `1px solid ${t.techTag?.border || t.tag.border}`,
+                                  }}
+                                >
+                                  {tech}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        {projLink && (
+                          <a href={projLink} target="_blank" rel="noopener noreferrer" className="text-xs font-bold pt-1" style={{ color: t.accent, textDecoration: 'none' }}>
+                            View Project →
+                          </a>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -879,7 +1107,7 @@ export default function PortfolioDocument({ data: propData }) {
 
             {/* Bento Card 3: Experience & Roles (Spans 2 Columns) */}
             {experience.length > 0 && (
-              <div className="md:col-span-2 space-y-4" style={{ ...cardStyle }}>
+              <div className={`${education.length > 0 ? 'md:col-span-2' : 'md:col-span-3'} space-y-4`} style={{ ...cardStyle }}>
                 <SectionHeading title="Experience" id="bento-exp" theme={theme} />
                 <div className="space-y-3">
                   {experience.map((exp) => (
@@ -903,19 +1131,78 @@ export default function PortfolioDocument({ data: propData }) {
               </div>
             )}
 
-            {/* Bento Card 4: Certifications & Credentials (Spans 1 Column) */}
-            {certifications.length > 0 && (
-              <div className="space-y-4" style={{ ...cardStyle }}>
-                <SectionHeading title="Certifications" id="bento-certs" theme={theme} />
+            {/* Bento Card 4: Education & Degrees */}
+            {education.length > 0 && (
+              <div className={`${experience.length > 0 ? 'md:col-span-1' : 'md:col-span-2'} space-y-4`} style={{ ...cardStyle }}>
+                <SectionHeading title="Education" id="bento-edu" theme={theme} />
                 <div className="space-y-3">
-                  {certifications.map((cert) => (
-                    <div key={cert.id} className="p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.4)', border: `1px solid ${t.border}` }}>
-                      <p style={{ fontWeight: 700, fontSize: '0.9rem', color: t.text, margin: '0 0 2px' }}>
-                        {cert.name}
-                      </p>
-                      <p style={{ fontSize: '0.8rem', color: t.text3, margin: 0 }}>{cert.issuer}</p>
-                    </div>
-                  ))}
+                  {education.map((edu) => {
+                    const degreeText = formatDegree(edu);
+                    const dates = formatEduDates(edu);
+                    return (
+                      <div key={edu.id} className="pb-3 border-b last:border-b-0" style={{ borderColor: t.border }}>
+                        <h4 style={{ fontFamily: displayFont, fontWeight: 700, fontSize: '0.95rem', color: t.text, margin: '0 0 2px' }}>
+                          {degreeText}
+                        </h4>
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <p style={{ fontSize: '0.84rem', color: t.accent, fontWeight: 600, margin: 0 }}>
+                            {edu.institution}
+                          </p>
+                          {dates && (
+                            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: t.text3 }}>
+                              {dates}
+                            </span>
+                          )}
+                        </div>
+                        {edu.gpa && (
+                          <p style={{ fontSize: '0.78rem', color: t.text3, margin: '3px 0 0' }}>
+                            <span style={{ fontWeight: 600, color: t.text2 }}>GPA:</span> {edu.gpa}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Bento Card 5: Certifications & Credentials */}
+            {certifications.length > 0 && (
+              <div className="md:col-span-3 space-y-4" style={{ ...cardStyle }}>
+                <SectionHeading title="Certifications & Credentials" id="bento-certs" theme={theme} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {certifications.map((cert) => {
+                    const media = cert.imageUrl || cert.fileUrl;
+                    const certYear = cert.year || cert.date || '';
+                    const certLink = cert.link || cert.fileUrl ? formatExternalUrl(cert.link || cert.fileUrl) : null;
+
+                    return (
+                      <div key={cert.id} className="p-3.5 rounded-xl flex items-center justify-between gap-3" style={{ background: 'rgba(255,255,255,0.4)', border: `1px solid ${t.border}` }}>
+                        <div className="flex items-center gap-3 min-w-0">
+                          {media && (
+                            <button type="button" onClick={() => openGallery(normalizeImageUrl(media))} className="shrink-0" style={{ padding: 0, border: 0, background: 'transparent', cursor: 'zoom-in' }}>
+                              <img src={normalizeImageUrl(media)} alt={cert.name || 'Certificate'} style={{ width: 38, height: 38, objectFit: 'cover', borderRadius: 8, border: `1px solid ${t.border}` }} />
+                            </button>
+                          )}
+                          <div className="min-w-0">
+                            <p style={{ fontWeight: 700, fontSize: '0.88rem', color: t.text, margin: '0 0 2px' }} className="truncate">
+                              {cert.name}
+                            </p>
+                            <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                              {cert.issuer && <span style={{ color: t.text3 }} className="truncate max-w-[120px]">{cert.issuer}</span>}
+                              {cert.issuer && certYear && <span style={{ color: t.text3 }}>·</span>}
+                              {certYear && <span style={{ fontWeight: 600, color: t.accent }}>{certYear}</span>}
+                            </div>
+                          </div>
+                        </div>
+                        {certLink && (
+                          <a href={certLink} target="_blank" rel="noopener noreferrer" className="text-xs font-bold shrink-0" style={{ color: t.accent, textDecoration: 'none' }}>
+                            ↗
+                          </a>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

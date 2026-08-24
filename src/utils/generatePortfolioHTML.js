@@ -123,6 +123,16 @@ function esc(str) {
     .replace(/'/g, '&#039;');
 }
 
+function formatExternalUrl(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string') return '';
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return '';
+  if (/^(?:mailto:|tel:|blob:|data:)/i.test(trimmed)) return trimmed;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith('//')) return `https:${trimmed}`;
+  return `https://${trimmed}`;
+}
+
 function responsibilityList(text, t) {
   if (!text) return '';
   const lines = text.split('\n').filter(l => l.trim()).map(l => l.replace(/^[•\-]\s*/, ''));
@@ -135,10 +145,10 @@ function responsibilityList(text, t) {
 function socialLinks(profile, t) {
   const links = [];
   if (profile.email)      links.push(`<a href="mailto:${esc(profile.email)}" class="social-link"><span class="icon">✉</span>${esc(profile.email)}</a>`);
-  if (profile.github)     links.push(`<a href="${esc(profile.github)}" target="_blank" rel="noopener" class="social-link"><span class="icon">⌥</span>GitHub</a>`);
-  if (profile.linkedin)   links.push(`<a href="${esc(profile.linkedin)}" target="_blank" rel="noopener" class="social-link"><span class="icon">in</span>LinkedIn</a>`);
-  if (profile.twitter)    links.push(`<a href="${esc(profile.twitter)}" target="_blank" rel="noopener" class="social-link"><span class="icon">𝕏</span>Twitter</a>`);
-  if (profile.resumeLink) links.push(`<a href="${esc(profile.resumeLink)}" target="_blank" rel="noopener" class="social-link resume-link">Resume ↗</a>`);
+  if (profile.github)     links.push(`<a href="${esc(formatExternalUrl(profile.github))}" target="_blank" rel="noopener noreferrer" class="social-link"><span class="icon">⌥</span>GitHub</a>`);
+  if (profile.linkedin)   links.push(`<a href="${esc(formatExternalUrl(profile.linkedin))}" target="_blank" rel="noopener noreferrer" class="social-link"><span class="icon">in</span>LinkedIn</a>`);
+  if (profile.twitter)    links.push(`<a href="${esc(formatExternalUrl(profile.twitter))}" target="_blank" rel="noopener noreferrer" class="social-link"><span class="icon">𝕏</span>Twitter</a>`);
+  if (profile.resumeLink) links.push(`<a href="${esc(formatExternalUrl(profile.resumeLink))}" target="_blank" rel="noopener noreferrer" class="social-link resume-link">Resume ↗</a>`);
   return links.length ? `<div class="social-row">${links.join('')}</div>` : '';
 }
 
@@ -269,15 +279,21 @@ export function generatePortfolioHTML(data, themeId = 'engineering-dark') {
     <section class="section">
       ${sectionHeading('Education', t)}
       <div class="edu-items">
-        ${education.map(e => `
+        ${education.map(e => {
+          const degreeText = e.degree && e.major && !e.degree.toLowerCase().includes(e.major.toLowerCase())
+            ? `${esc(e.degree)} · ${esc(e.major)}`
+            : esc(e.degree || e.major || 'Degree');
+          const dates = [e.startDate || e.startYear, e.endDate || e.endYear || (e.current ? 'Present' : '')].filter(Boolean).join(' – ');
+          return `
           <div class="edu-item">
             <div>
-              <div class="edu-degree">${esc(e.degree || 'Degree')}</div>
+              <div class="edu-degree">${degreeText}</div>
               <div class="edu-inst">${esc(e.institution || '')}</div>
               ${e.gpa ? `<div class="edu-gpa">GPA: ${esc(e.gpa)}</div>` : ''}
             </div>
-            <span class="badge">${esc([e.startYear, e.endYear].filter(Boolean).join(' – ') || '')}</span>
-          </div>`).join('')}
+            ${dates ? `<span class="badge">${esc(dates)}</span>` : ''}
+          </div>`;
+        }).join('')}
       </div>
     </section>` : '';
 
@@ -304,7 +320,11 @@ export function generatePortfolioHTML(data, themeId = 'engineering-dark') {
     <section class="section">
       ${sectionHeading('Projects', t)}
       <div class="proj-grid${projects.length === 1 ? ' single' : ''}">
-        ${projects.map(p => `
+        ${projects.map(p => {
+          const stackList = Array.isArray(p.techStack)
+            ? p.techStack
+            : (typeof p.techStack === 'string' ? p.techStack.split(',').map(s => s.trim()).filter(Boolean) : []);
+          return `
           <article class="proj-card${p.featured ? ' featured' : ''}">
             ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${esc(p.title)} screenshot" class="proj-img">` : ''}
             <div class="proj-header">
@@ -312,9 +332,10 @@ export function generatePortfolioHTML(data, themeId = 'engineering-dark') {
               ${p.featured ? `<span class="feat-badge">${t.mono ? '[FEAT]' : '★ Featured'}</span>` : ''}
             </div>
             ${p.description ? `<div class="proj-desc">${esc(p.description)}</div>` : ''}
-            ${p.techStack?.length ? `<div class="tech-tags">${p.techStack.map(s => `<span class="tech-tag">${esc(s)}</span>`).join('')}</div>` : ''}
-            ${p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener" class="proj-link">↗ ${t.mono ? '$ open' : 'View Project'}</a>` : ''}
-          </article>`).join('')}
+            ${stackList.length ? `<div class="tech-tags">${stackList.map(s => `<span class="tech-tag">${esc(s)}</span>`).join('')}</div>` : ''}
+            ${p.link ? `<a href="${esc(formatExternalUrl(p.link))}" target="_blank" rel="noopener noreferrer" class="proj-link">↗ ${t.mono ? '$ open' : 'View Project'}</a>` : ''}
+          </article>`;
+        }).join('')}
       </div>
     </section>` : '';
 
@@ -329,18 +350,24 @@ export function generatePortfolioHTML(data, themeId = 'engineering-dark') {
   const certsHtml = certifications.length ? `
     <section class="section">
       ${sectionHeading('Certifications', t)}
-      ${certifications.map(c => `
+      ${certifications.map(c => {
+        const certYear = c.year || c.date || '';
+        return `
         <div class="cert-item">
           <div>
             <div class="cert-name">${esc(c.name || '')}</div>
-            ${c.issuer ? `<div class="cert-issuer">${esc(c.issuer)}</div>` : ''}
+            <div style="display:flex;gap:8px;align-items:center;margin-top:2px;">
+              ${c.issuer ? `<span class="cert-issuer">${esc(c.issuer)}</span>` : ''}
+              ${c.issuer && certYear ? `<span style="color:${t.text3};font-size:.8125rem">·</span>` : ''}
+              ${certYear ? `<span class="cert-year" style="color:${t.accent};font-weight:600">${esc(certYear)}</span>` : ''}
+            </div>
           </div>
           <div class="cert-meta">
-            ${c.year ? `<span class="cert-year">${esc(c.year)}</span>` : ''}
-            ${c.fileUrl ? `<a href="${c.fileUrl}" target="_blank" class="cert-link">📎 View</a>` : ''}
-            ${c.link && !c.fileUrl ? `<a href="${esc(c.link)}" target="_blank" class="cert-link">↗ Verify</a>` : ''}
+            ${c.fileUrl ? `<a href="${esc(formatExternalUrl(c.fileUrl))}" target="_blank" rel="noopener noreferrer" class="cert-link">📎 View</a>` : ''}
+            ${c.link && !c.fileUrl ? `<a href="${esc(formatExternalUrl(c.link))}" target="_blank" rel="noopener noreferrer" class="cert-link">↗ Verify</a>` : ''}
           </div>
-        </div>`).join('')}
+        </div>`;
+      }).join('')}
     </section>` : '';
 
   const fonts = `https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap`;

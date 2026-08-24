@@ -58,3 +58,32 @@ export function normalizeImageUrl(rawUrl) {
     return url;
   }
 }
+
+/**
+ * Safely format an external web URL to ensure it has http/https protocol.
+ * Prevents client-side router 404s when navigating to user-entered URLs
+ * such as 'linkedin.com/in/username' or 'github.com/org'.
+ */
+export function formatExternalUrl(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string') return '';
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return '';
+
+  // Data URLs, Blob URLs, mailto, tel
+  if (/^(?:mailto:|tel:|blob:|data:)/i.test(trimmed)) {
+    return trimmed;
+  }
+
+  // Already has http:// or https://
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  // Protocol-relative URL like //example.com
+  if (trimmed.startsWith('//')) {
+    return `https:${trimmed}`;
+  }
+
+  // Otherwise prepend https://
+  return `https://${trimmed}`;
+}

@@ -29,7 +29,7 @@ function portfolioReducer(state, action) {
         ...state,
         education: [
           ...state.education,
-          { id: makeId(), degree: '', institution: '', startYear: '', endYear: '', gpa: '' },
+          { id: makeId(), degree: '', major: '', institution: '', startYear: '', endYear: '', startDate: '', endDate: '', gpa: '' },
         ],
       };
     case 'UPDATE_EDUCATION':

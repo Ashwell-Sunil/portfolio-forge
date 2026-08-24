@@ -66,13 +66,22 @@ export default function EducationSection() {
               </button>
             </div>
 
-            <FormField
-              id={`edu-degree-${edu.id}`}
-              label="Degree / Major"
-              value={edu.degree}
-              onChange={updateEdu(edu.id, 'degree')}
-              placeholder="M.S. Computer Science"
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <FormField
+                id={`edu-degree-${edu.id}`}
+                label="Degree"
+                value={edu.degree}
+                onChange={updateEdu(edu.id, 'degree')}
+                placeholder="B.S. / M.S."
+              />
+              <FormField
+                id={`edu-major-${edu.id}`}
+                label="Major / Field of Study"
+                value={edu.major || ''}
+                onChange={updateEdu(edu.id, 'major')}
+                placeholder="Computer Science"
+              />
+            </div>
             <FormField
               id={`edu-institution-${edu.id}`}
               label="Institution / University"
@@ -83,22 +92,28 @@ export default function EducationSection() {
             <div className="grid grid-cols-3 gap-2">
               <FormField
                 id={`edu-start-${edu.id}`}
-                label="Start"
-                value={edu.startYear}
-                onChange={updateEdu(edu.id, 'startYear')}
+                label="Start Year"
+                value={edu.startYear || edu.startDate || ''}
+                onChange={(val) => {
+                  updateEdu(edu.id, 'startYear')(val);
+                  updateEdu(edu.id, 'startDate')(val);
+                }}
                 placeholder="2017"
               />
               <FormField
                 id={`edu-end-${edu.id}`}
-                label="End"
-                value={edu.endYear}
-                onChange={updateEdu(edu.id, 'endYear')}
+                label="End Year"
+                value={edu.endYear || edu.endDate || ''}
+                onChange={(val) => {
+                  updateEdu(edu.id, 'endYear')(val);
+                  updateEdu(edu.id, 'endDate')(val);
+                }}
                 placeholder="2019"
               />
               <FormField
                 id={`edu-gpa-${edu.id}`}
                 label="GPA"
-                value={edu.gpa}
+                value={edu.gpa || ''}
                 onChange={updateEdu(edu.id, 'gpa')}
                 placeholder="3.94"
               />
