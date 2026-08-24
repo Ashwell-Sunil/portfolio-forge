@@ -204,7 +204,7 @@ export default function EditorWorkspace() {
 
   return (
     <div
-      className="flex flex-col h-screen w-screen overflow-hidden spectrum-app transition-colors duration-200"
+      className="flex flex-col h-screen h-[100dvh] w-full max-w-full overflow-hidden spectrum-app transition-colors duration-200"
       style={{
         background: 'var(--pf-editor-bg, #EDE7DC)',
         color: 'var(--pf-text-primary, #1B2A1B)',

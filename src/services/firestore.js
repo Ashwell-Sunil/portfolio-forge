@@ -37,7 +37,7 @@ export async function savePortfolioToFirestore(uid, portfolioData) {
     throw new Error('User ID is required to save portfolio');
   }
 
-  const username = (portfolioData.profile?.slug || generateSlug(portfolioData.profile?.name) || uid)
+  const slug = (portfolioData.profile?.slug || generateSlug(portfolioData.profile?.name) || uid)
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, '');
 
@@ -47,7 +47,8 @@ export async function savePortfolioToFirestore(uid, portfolioData) {
     ownerId: uid,
     userId: uid,
     creatorId: uid,
-    username,
+    slug,
+    username: slug,
     updatedAt: serverTimestamp(),
     publishedAt: serverTimestamp(),
   });
@@ -56,14 +57,16 @@ export async function savePortfolioToFirestore(uid, portfolioData) {
   await setDoc(doc(db, 'portfolios', uid), payload, { merge: true });
 
   // Save slug alias pointing to this user
-  await setDoc(doc(db, 'usernames', username), {
+  await setDoc(doc(db, 'usernames', slug), {
     uid,
     userId: uid,
     ownerId: uid,
+    slug,
+    username: slug,
     updatedAt: serverTimestamp(),
   }, { merge: true });
 
-  return { uid, username };
+  return { uid, username: slug, slug };
 }
 
 export async function loadPortfolioByUid(uid) {
@@ -153,25 +156,44 @@ export async function deletePortfolioFromFirestore(uid, username) {
 
 export async function loadPortfolioByUsername(username) {
   assertDb();
-  const key = String(username || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
+  const key = String(username || '').toLowerCase().trim().replace(/[^a-z0-9-]/g, '');
   if (!key) return null;
 
-  const alias = await getDoc(doc(db, 'usernames', key));
-  if (alias.exists()) {
-    const { uid } = alias.data();
-    if (uid) {
-      const port = await getDoc(doc(db, 'portfolios', uid));
-      if (port.exists()) return port.data();
+  try {
+    // 1. Direct document lookup by User ID (in case slug is uid)
+    const directDoc = await getDoc(doc(db, 'portfolios', key));
+    if (directDoc.exists()) {
+      return directDoc.data();
     }
+
+    // 2. Lookup alias in usernames collection
+    const alias = await getDoc(doc(db, 'usernames', key));
+    if (alias.exists()) {
+      const { uid } = alias.data();
+      if (uid) {
+        const port = await getDoc(doc(db, 'portfolios', uid));
+        if (port.exists()) return port.data();
+      }
+    }
+
+    // 3. Query portfolios collection using where('slug', '==', key)
+    const qSlug = query(collection(db, 'portfolios'), where('slug', '==', key), limit(1));
+    const slugRes = await getDocs(qSlug);
+    if (!slugRes.empty) return slugRes.docs[0].data();
+
+    // 4. Query portfolios collection using where('username', '==', key)
+    const qUsername = query(collection(db, 'portfolios'), where('username', '==', key), limit(1));
+    const usernameRes = await getDocs(qUsername);
+    if (!usernameRes.empty) return usernameRes.docs[0].data();
+
+    // 5. Query portfolios collection using where('profile.slug', '==', key)
+    const qProfileSlug = query(collection(db, 'portfolios'), where('profile.slug', '==', key), limit(1));
+    const profileSlugRes = await getDocs(qProfileSlug);
+    if (!profileSlugRes.empty) return profileSlugRes.docs[0].data();
+
+    return null;
+  } catch (err) {
+    console.warn('loadPortfolioByUsername query error:', err);
+    return null;
   }
-
-  const q = query(collection(db, 'portfolios'), where('username', '==', key), limit(1));
-  const result = await getDocs(q);
-  if (!result.empty) return result.docs[0].data();
-
-  const slugQuery = query(collection(db, 'portfolios'), where('profile.slug', '==', key), limit(1));
-  const slugResult = await getDocs(slugQuery);
-  if (!slugResult.empty) return slugResult.docs[0].data();
-
-  return null;
 }

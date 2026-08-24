@@ -22,9 +22,16 @@ export default function CanvasPanel() {
       />
 
       {/* Scrollable Live Document Preview Area with appropriate mobile padding */}
-      <div className="relative h-full w-full overflow-y-auto spectrum-scroll p-2.5 sm:p-5 md:p-8 flex justify-center">
+      <div
+        className="relative h-full w-full overflow-y-auto overflow-x-hidden spectrum-scroll p-2 sm:p-5 md:p-8 flex justify-center"
+        style={{
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y',
+          overscrollBehaviorY: 'contain',
+        }}
+      >
         <div
-          className="w-full max-w-4xl min-h-full rounded-xl sm:rounded-2xl shadow-xl transition-all duration-200 overflow-hidden"
+          className="w-full max-w-4xl min-h-full rounded-xl sm:rounded-2xl shadow-xl transition-all duration-200 overflow-x-hidden"
           style={{
             background: theme.colors.pageBg,
             border: '1px solid var(--pf-border-color, #D8CEBE)',

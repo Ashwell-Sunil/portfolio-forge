@@ -18,28 +18,18 @@ export default function PublicPortfolio() {
     let cancelled = false;
 
     async function load() {
-      // 1. Check local storage first (instant access for active editor session)
-      let localData = null;
-      try {
-        localData = loadPortfolio(user?.uid);
-      } catch (e) {
-        console.warn('Could not read local storage:', e);
-      }
+      // 1. DEMO BYPASS: If slug is 'demo', 'sample', 'sample-portfolio', 'alex-vance', or empty root
+      const rawUser = String(username || '').toLowerCase().trim();
+      const normalizedUser = rawUser.replace(/[^a-z0-9-]/g, '');
 
-      // If viewing root or if username matches active local portfolio slug
-      if (!username) {
-        if (!cancelled) {
-          setData(localData || defaultPortfolioData);
-          setState('done');
-        }
-        return;
-      }
-
-      const normalizedUser = String(username || '').toLowerCase().trim();
-      const localSlug = (localData?.profile?.slug || generateSlug(localData?.profile?.name || '')).toLowerCase();
-
-      // If user requested the sample slug
-      if (normalizedUser === 'alex-vance' || normalizedUser === 'sample-portfolio' || normalizedUser === 'sample') {
+      if (
+        !normalizedUser ||
+        normalizedUser === 'demo' ||
+        normalizedUser === 'sample' ||
+        normalizedUser === 'sample-portfolio' ||
+        normalizedUser === 'alex-vance' ||
+        normalizedUser === 'view-demo'
+      ) {
         if (!cancelled) {
           setData(defaultPortfolioData);
           setState('done');
@@ -47,7 +37,14 @@ export default function PublicPortfolio() {
         return;
       }
 
-      // If user is previewing their own active local portfolio
+      // Check local storage for active session previews (/preview or /me)
+      let localData = null;
+      try {
+        localData = loadPortfolio(user?.uid);
+      } catch (e) {
+        console.warn('Could not read local storage:', e);
+      }
+
       if (localData && (normalizedUser === 'preview' || normalizedUser === 'me')) {
         if (!cancelled) {
           setData(localData);
@@ -56,11 +53,11 @@ export default function PublicPortfolio() {
         return;
       }
 
-      // 2. Try Firestore with timeout safeguard so it never hangs
+      // 2. Query Firestore by slug / username
       if (isFirebaseConfigured) {
         try {
           const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Firestore fetch timeout')), 2500)
+            setTimeout(() => reject(new Error('Firestore fetch timeout')), 4000)
           );
 
           const remote = await Promise.race([
@@ -70,7 +67,7 @@ export default function PublicPortfolio() {
 
           if (cancelled) return;
 
-          if (remote) {
+          if (remote && (remote.profile?.name || remote.projects?.length > 0)) {
             setData(remote);
             setState('done');
             return;
@@ -80,9 +77,10 @@ export default function PublicPortfolio() {
         }
       }
 
-      // 3. Fallback: if remote didn't resolve, check matching local slug or mark missing
+      // 3. Check matching local slug if offline or recently saved in session
       if (!cancelled) {
-        if (localData && localSlug === normalizedUser && localData.profile?.name) {
+        const localSlug = (localData?.profile?.slug || generateSlug(localData?.profile?.name || '')).toLowerCase();
+        if (localData && (localSlug === normalizedUser || localData.slug === normalizedUser) && localData.profile?.name) {
           setData(localData);
           setState('done');
         } else {
@@ -91,18 +89,11 @@ export default function PublicPortfolio() {
       }
     }
 
-    // Safety fallback: if anything stalls, force missing/fallback state within 3 seconds
-    const safetyTimer = setTimeout(() => {
-      if (!cancelled && state === 'loading') {
-        setState('missing');
-      }
-    }, 3000);
-
+    setState('loading');
     load();
 
     return () => {
       cancelled = true;
-      clearTimeout(safetyTimer);
     };
   }, [username, user?.uid]);
 
@@ -125,12 +116,12 @@ export default function PublicPortfolio() {
   if (state === 'loading') {
     return (
       <div
-        className="min-h-screen flex items-center justify-center transition-colors"
-        style={{ background: '#E4ECE4' }}
+        className="min-h-screen min-h-[100dvh] w-full flex items-center justify-center transition-colors"
+        style={{ background: '#FAF7F2' }}
       >
         <div className="flex flex-col items-center gap-3">
-          <div className="w-9 h-9 border-3 border-[#447244] border-t-transparent rounded-full animate-spin" />
-          <p className="text-[11px] font-mono tracking-widest text-[#4F684F]">LOADING PORTFOLIO...</p>
+          <div className="w-10 h-10 border-3 border-[#447244] border-t-transparent rounded-full animate-spin" />
+          <p className="text-[11px] font-mono tracking-widest text-[#4F684F] font-semibold">LOADING PORTFOLIO...</p>
         </div>
       </div>
     );
@@ -139,8 +130,8 @@ export default function PublicPortfolio() {
   if (state === 'missing' || !data) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center px-6"
-        style={{ background: '#E4ECE4' }}
+        className="min-h-screen min-h-[100dvh] w-full flex items-center justify-center px-6"
+        style={{ background: '#FAF7F2' }}
       >
         <div
           className="text-center space-y-4 max-w-sm p-8 rounded-2xl shadow-xl"

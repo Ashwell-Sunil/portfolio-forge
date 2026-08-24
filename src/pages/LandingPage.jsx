@@ -54,7 +54,7 @@ export default function LandingPage() {
           {/* Header Actions */}
           <div className="flex items-center gap-3">
             <Link
-              to="/alex-vance"
+              to="/demo"
               target="_blank"
               className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all hover:scale-105"
               style={{
@@ -132,7 +132,7 @@ export default function LandingPage() {
           </Link>
 
           <Link
-            to="/alex-vance"
+            to="/demo"
             target="_blank"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-sm font-bold border transition-all hover:scale-105"
             style={{
@@ -314,7 +314,7 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center gap-6">
-            <Link to="/alex-vance" className="hover:underline">
+            <Link to="/demo" className="hover:underline">
               Sample Portfolio
             </Link>
             <Link to="/dashboard" className="hover:underline font-semibold" style={{ color: activeTheme.colors.accent }}>
