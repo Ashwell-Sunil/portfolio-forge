@@ -4,40 +4,49 @@ import { Sparkles, Edit3, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { isFirebaseConfigured } from '../services/firebase';
 import { loadPortfolioByUsername } from '../services/firestore';
-import { loadPortfolio, defaultPortfolioData, generateSlug } from '../services/storage';
+import { loadPortfolio, defaultPortfolioData, normalizeSlug } from '../services/storage';
 import { getTheme, themeToCssVars } from '../themes/themes';
 import PortfolioDocument from '../components/preview/PortfolioDocument';
 
 export default function PublicPortfolio() {
   const { username } = useParams();
   const { user } = useAuth();
-  const [state, setState] = useState('loading');
+  const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    let cancelled = false;
+    let isCancelled = false;
 
     async function load() {
-      // 1. DEMO BYPASS: If slug is 'demo', 'sample', 'sample-portfolio', 'alex-vance', or empty root
-      const rawUser = String(username || '').toLowerCase().trim();
-      const normalizedUser = rawUser.replace(/[^a-z0-9-]/g, '');
+      setIsLoading(true);
+      setData(null);
 
-      if (
-        !normalizedUser ||
-        normalizedUser === 'demo' ||
-        normalizedUser === 'sample' ||
-        normalizedUser === 'sample-portfolio' ||
-        normalizedUser === 'alex-vance' ||
-        normalizedUser === 'view-demo'
-      ) {
-        if (!cancelled) {
-          setData(defaultPortfolioData);
-          setState('done');
+      const currentSlug = normalizeSlug(username);
+
+      if (!currentSlug) {
+        if (!isCancelled) {
+          setData(null);
+          setIsLoading(false);
         }
         return;
       }
 
-      // Check local storage for active session previews (/preview or /me)
+      // 1. DEMO BYPASS: Check if slug is demo / sample
+      if (
+        currentSlug === 'demo' ||
+        currentSlug === 'sample' ||
+        currentSlug === 'sample-portfolio' ||
+        currentSlug === 'alex-vance' ||
+        currentSlug === 'view-demo'
+      ) {
+        if (!isCancelled) {
+          setData(defaultPortfolioData);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      // 2. Check local storage for active session previews (/preview or /me)
       let localData = null;
       try {
         localData = loadPortfolio(user?.uid);
@@ -45,55 +54,42 @@ export default function PublicPortfolio() {
         console.warn('Could not read local storage:', e);
       }
 
-      if (localData && (normalizedUser === 'preview' || normalizedUser === 'me')) {
-        if (!cancelled) {
+      if (localData && (currentSlug === 'preview' || currentSlug === 'me')) {
+        if (!isCancelled) {
           setData(localData);
-          setState('done');
+          setIsLoading(false);
         }
         return;
       }
 
-      // 2. Query Firestore by slug / username
+      // 3. Query Firestore by slug
+      let foundData = null;
       if (isFirebaseConfigured) {
         try {
-          const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Firestore fetch timeout')), 4000)
-          );
-
-          const remote = await Promise.race([
-            loadPortfolioByUsername(normalizedUser),
-            timeoutPromise,
-          ]);
-
-          if (cancelled) return;
-
-          if (remote && (remote.profile?.name || remote.projects?.length > 0)) {
-            setData(remote);
-            setState('done');
-            return;
-          }
+          foundData = await loadPortfolioByUsername(currentSlug);
         } catch (err) {
-          console.warn('Firestore load failed or timed out:', err);
+          console.warn('Firestore load failed:', err);
         }
       }
 
-      // 3. Check matching local slug if offline or recently saved in session
-      if (!cancelled) {
-        const localSlug = (localData?.profile?.slug || generateSlug(localData?.profile?.name || '')).toLowerCase();
-        if (localData && (localSlug === normalizedUser || localData.slug === normalizedUser) && localData.profile?.name) {
-          setData(localData);
-          setState('done');
-        } else {
-          setState('missing');
+      // 4. Fallback: check matching local slug if offline or saved locally in this session
+      if (!foundData && localData) {
+        const localSlug = normalizeSlug(localData.profile?.slug || localData.slug || localData.profile?.name || '');
+        if (localSlug === currentSlug || localData.uid === currentSlug) {
+          foundData = localData;
         }
+      }
+
+      if (!isCancelled) {
+        setData(foundData);
+        setIsLoading(false);
       }
     }
 
-    setState('loading');
     load();
 
     return () => {
-      cancelled = true;
+      isCancelled = true;
     };
   }, [username, user?.uid]);
 
@@ -113,7 +109,7 @@ export default function PublicPortfolio() {
     )
   );
 
-  if (state === 'loading') {
+  if (isLoading) {
     return (
       <div
         className="min-h-screen min-h-[100dvh] w-full flex items-center justify-center transition-colors"
@@ -127,7 +123,7 @@ export default function PublicPortfolio() {
     );
   }
 
-  if (state === 'missing' || !data) {
+  if (!data) {
     return (
       <div
         className="min-h-screen min-h-[100dvh] w-full flex items-center justify-center px-6"

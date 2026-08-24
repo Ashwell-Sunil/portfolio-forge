@@ -4,6 +4,7 @@ import { usePortfolio } from '../../../context/PortfolioContext';
 import { isFirebaseConfigured } from '../../../services/firebase';
 import {
   generateSlug,
+  normalizeSlug,
   defaultPortfolioData,
   blankPortfolioData,
   savePortfolio,
@@ -16,7 +17,7 @@ import SectionWrapper from '../shared/SectionWrapper';
 export default function SettingsSection({ onPublish }) {
   const { user, signOut } = useAuth();
   const { portfolioData, dispatch } = usePortfolio();
-  const slug = portfolioData.profile?.slug || generateSlug(portfolioData.profile?.name);
+  const slug = normalizeSlug(portfolioData.profile?.slug || generateSlug(portfolioData.profile?.name));
   const publicPath = `/${slug || 'username'}`;
 
   const handleResetSample = () => {
@@ -109,7 +110,7 @@ export default function SettingsSection({ onPublish }) {
           onChange={(value) =>
             dispatch({
               type: 'UPDATE_PROFILE',
-              payload: { slug: value.toLowerCase().replace(/[^a-z0-9-]/g, '') },
+              payload: { slug: normalizeSlug(value) },
             })
           }
           placeholder="alex-vance"

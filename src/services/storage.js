@@ -254,10 +254,19 @@ export function clearPortfolio(uid) {
   }
 }
 
-// ─── Slug Generator ────────────────────────────────────────────────────────
+// ─── Slug Generator & Normalizer ───────────────────────────────────────────
+export function normalizeSlug(slug) {
+  if (!slug) return '';
+  return String(slug)
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-');
+}
+
 export function generateSlug(name) {
   if (!name || !name.trim()) return 'portfolio';
-  return name
+  return String(name)
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, '')

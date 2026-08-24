@@ -18,6 +18,7 @@ import {
   savePortfolio,
   loadPortfolio,
   generateSlug,
+  normalizeSlug,
   blankPortfolioData,
   defaultPortfolioData,
 } from '../../../services/storage';
@@ -173,9 +174,8 @@ export default function EditorWorkspace() {
     };
     savePortfolio(dataToSave, targetUid);
 
-    const slug = (portfolioData.profile?.slug || generateSlug(portfolioData.profile?.name))
-      .toLowerCase()
-      .replace(/[^a-z0-9-]/g, '');
+    const rawSlug = portfolioData.profile?.slug || generateSlug(portfolioData.profile?.name);
+    const slug = normalizeSlug(rawSlug);
 
     try {
       if (isFirebaseConfigured && targetUid && !user?.isDemo) {
@@ -202,7 +202,7 @@ export default function EditorWorkspace() {
     }
   }, [portfolioData, showToast, user]);
 
-  const slug = portfolioData.profile?.slug || generateSlug(portfolioData.profile?.name);
+  const slug = normalizeSlug(portfolioData.profile?.slug || generateSlug(portfolioData.profile?.name));
 
   return (
     <div

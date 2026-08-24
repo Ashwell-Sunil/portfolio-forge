@@ -1,4 +1,5 @@
 import { usePortfolio } from '../../../context/PortfolioContext';
+import { normalizeSlug } from '../../../services/storage';
 import FormField from '../shared/FormField';
 import FileUploadField from '../shared/FileUploadField';
 import SectionWrapper from '../shared/SectionWrapper';
@@ -58,7 +59,7 @@ export default function ProfileSection() {
             id="profile-slug"
             label="Public Slug"
             value={profile.slug}
-            onChange={update('slug')}
+            onChange={(val) => update('slug')(normalizeSlug(val))}
             placeholder="alex-vance"
             hint="foliovitae.app/{slug}"
           />
