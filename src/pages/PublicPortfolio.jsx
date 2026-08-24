@@ -170,11 +170,12 @@ export default function PublicPortfolio() {
 
   return (
     <div
-      className="min-h-screen relative public-portfolio-root overflow-y-auto"
+      className="min-h-screen min-h-[100dvh] w-full relative overflow-x-hidden"
       style={{
         background: activeTheme.colors.pageBg,
         color: activeTheme.colors.text,
         ...cssVars,
+        WebkitOverflowScrolling: 'touch',
       }}
     >
       {/* Pristine Public Read-Only Portfolio Document */}

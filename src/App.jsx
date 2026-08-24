@@ -4,6 +4,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import EditorPage from './pages/EditorPage';
+import DemoPortfolio from './pages/DemoPortfolio';
 import PublicPortfolio from './pages/PublicPortfolio';
 
 export default function App() {
@@ -31,6 +32,12 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Static Demo Portfolio — no Firebase, no auth, no catch-all interference */}
+          <Route path="/demo" element={<DemoPortfolio />} />
+          <Route path="/sample" element={<DemoPortfolio />} />
+          <Route path="/sample-portfolio" element={<DemoPortfolio />} />
+          <Route path="/alex-vance" element={<DemoPortfolio />} />
 
           {/* Public Portfolio Route Aliases & Direct Links */}
           <Route path="/p/:username" element={<PublicPortfolio />} />

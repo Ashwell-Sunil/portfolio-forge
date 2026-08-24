@@ -9,7 +9,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { loadPortfolio, clearPortfolio } from '../services/storage';
+import { loadPortfolio, savePortfolio, clearPortfolio } from '../services/storage';
 import { loadPortfolioByUid, deletePortfolioFromFirestore } from '../services/firestore';
 import { isFirebaseConfigured } from '../services/firebase';
 import { getTheme, DEFAULT_THEME_ID } from '../themes/themes';
@@ -97,7 +97,8 @@ export default function DashboardPage() {
   };
 
   const handleLoadSample = () => {
-    navigate('/editor?sample=true');
+    // Route to the dedicated read-only demo page instead of loading into the editor
+    navigate('/demo');
   };
 
   const handleDeleteRecent = async (e) => {
@@ -141,10 +142,10 @@ export default function DashboardPage() {
 
       {/* Unified Sage/Cream Navigation Header */}
       <header className="sticky top-0 z-40 backdrop-blur-md bg-[#FAF7F2]/85 border-b border-[#E2DCD2]">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="group" title="Return to Home">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-3">
+          <Link to="/" className="group shrink-0" title="Return to Home">
             <FolioVitaeLogo
-              size={34}
+              size={30}
               subtitle="Dashboard"
               textColor="#1B2A1B"
               accentColor="#447244"
@@ -152,21 +153,21 @@ export default function DashboardPage() {
             />
           </Link>
 
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-medium px-3.5 py-1.5 rounded-full border border-[#E2DCD2] bg-[#FFFFFF] text-[#4A584A] shadow-sm hidden sm:inline-block">
-              👤 {user?.displayName || user?.email || 'Active Workspace Session'}
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-xs font-medium px-3 py-1.5 rounded-full border border-[#E2DCD2] bg-[#FFFFFF] text-[#4A584A] shadow-sm hidden md:inline-block max-w-[180px] truncate">
+              👤 {user?.displayName || user?.email || 'Active Workspace'}
             </span>
             <button
               type="button"
               onClick={signOut}
-              className="text-xs font-semibold px-3 py-1.5 rounded-full border border-[#E2DCD2] bg-[#FFFFFF] hover:bg-[#F5F0E8] text-[#718096] hover:text-[#C53030] transition-all cursor-pointer"
+              className="text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-full border border-[#E2DCD2] bg-[#FFFFFF] hover:bg-[#F5F0E8] text-[#718096] hover:text-[#C53030] transition-all cursor-pointer whitespace-nowrap"
               title="Sign out"
             >
               Sign Out
             </button>
             <Link
               to="/editor"
-              className="text-xs font-bold px-4 py-2 rounded-full text-white bg-[#447244] hover:bg-[#365D36] shadow-md shadow-[#447244]/25 transition-all hover:scale-105"
+              className="text-xs font-bold px-3 sm:px-4 py-2 rounded-full text-white bg-[#447244] hover:bg-[#365D36] shadow-md shadow-[#447244]/25 transition-all hover:scale-105 whitespace-nowrap"
             >
               Open Editor
             </Link>
@@ -266,8 +267,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div
-              onClick={handleLoadSample}
-              className="group p-6 rounded-2xl border border-[#E2DCD2] hover:border-[#447244] bg-[#FFFFFF] transition-all duration-200 hover:scale-[1.02] cursor-pointer relative overflow-hidden flex flex-col justify-between shadow-md hover:shadow-xl hover:shadow-[#447244]/10"
+              className="group p-6 rounded-2xl border border-[#E2DCD2] bg-[#FFFFFF] relative overflow-hidden flex flex-col justify-between shadow-md hover:shadow-xl hover:shadow-[#447244]/10 transition-all duration-200"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -280,15 +280,15 @@ export default function DashboardPage() {
                     </span>
                   </div>
                   <span className="text-[11px] font-semibold text-[#447244] bg-[#EAF0EA] px-2.5 py-0.5 rounded-full">
-                    Interactive Sample
+                    Read-Only Preview
                   </span>
                 </div>
 
                 <h3 className="text-lg font-bold mb-1 text-[#1B2A1B]">
-                  Sample Layout - Explore Features
+                  Sample Layout — Explore Features
                 </h3>
                 <p className="text-xs font-semibold mb-3 text-[#447244]">
-                  Senior Distributed Systems & Cloud Architect
+                  Senior Distributed Systems &amp; Cloud Architect
                 </p>
 
                 <p className="text-xs leading-relaxed line-clamp-2 mb-4 text-[#4A584A]">
@@ -298,7 +298,7 @@ export default function DashboardPage() {
                 <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#6B7A6E]">
                   <span className="px-2.5 py-1 rounded-full border border-[#E2DCD2] bg-[#F7F4EE] text-[#4A584A] flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full inline-block bg-[#447244]" />
-                    <span>Sage & Olive (Botanical)</span>
+                    <span>Sage &amp; Olive (Botanical)</span>
                   </span>
                   <span className="px-2.5 py-1 rounded-full border border-[#E2DCD2] bg-[#F7F4EE] text-[#4A584A]">
                     📁 3 Projects
@@ -309,13 +309,22 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <div className="pt-6 mt-6 border-t border-[#EFE9E0] flex items-center justify-between">
-                <span className="text-xs font-bold text-[#447244]">
-                  Explore Demo Features
-                </span>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white bg-[#447244] transition-transform group-hover:translate-x-1">
-                  <ArrowRight size={14} />
-                </div>
+              {/* Two distinct actions */}
+              <div className="pt-6 mt-6 border-t border-[#EFE9E0] flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => navigate('/demo')}
+                  className="flex-1 text-xs font-bold px-4 py-2 rounded-full border border-[#447244] text-[#447244] hover:bg-[#EAF0EA] transition-all text-center cursor-pointer"
+                >
+                  👁 View Read-Only Demo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/editor?sample=true')}
+                  className="flex-1 text-xs font-bold px-4 py-2 rounded-full text-white bg-[#447244] hover:bg-[#365D36] transition-all text-center shadow-md shadow-[#447244]/25 cursor-pointer"
+                >
+                  ✏️ Start from Template
+                </button>
               </div>
             </div>
           )}
@@ -359,7 +368,7 @@ export default function DashboardPage() {
 
           {/* Card 3: Load Sample Portfolio */}
           <div
-            onClick={handleLoadSample}
+            onClick={() => navigate('/demo')}
             className="group p-6 rounded-2xl border border-[#E2DCD2] hover:border-[#447244] bg-[#F7F4EE] transition-all duration-200 hover:scale-[1.02] cursor-pointer flex flex-col justify-between md:col-span-2 shadow-sm hover:shadow-md"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

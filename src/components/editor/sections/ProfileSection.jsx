@@ -24,7 +24,7 @@ export default function ProfileSection() {
           label="Full Name *"
           value={profile.name}
           onChange={update('name')}
-          placeholder="Alex Vance"
+          placeholder="Your Full Name"
         />
 
         <FormField

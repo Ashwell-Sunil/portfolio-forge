@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer } from 'react';
-import { loadPortfolio } from '../services/storage';
+import { blankPortfolioData } from '../services/storage';
 import { DEFAULT_THEME_ID } from '../themes/themes';
 
 // ─── Context ───────────────────────────────────────────────────────────────
@@ -108,7 +108,7 @@ function portfolioReducer(state, action) {
     case 'REMOVE_CERTIFICATION':
       return { ...state, certifications: state.certifications.filter(c => c.id !== action.payload) };
 
-    // Reset
+    // Reset / full replace
     case 'RESET':
       return action.payload;
 
@@ -118,11 +118,15 @@ function portfolioReducer(state, action) {
 }
 
 // ─── Default initializer ───────────────────────────────────────────────────
+// IMPORTANT: We intentionally do NOT call loadPortfolio() here without a uid.
+// Doing so returns defaultPortfolioData (the sample), causing the editor canvas
+// to show stale/wrong data before the EditorWorkspace async uid-scoped load runs.
+// Instead, we start with a clean blank slate; EditorWorkspace's useEffect will
+// dispatch RESET with the correct user-scoped data once auth resolves.
 function initState() {
-  const saved = loadPortfolio();
   return {
+    ...blankPortfolioData,
     themeId: DEFAULT_THEME_ID,
-    ...saved,
   };
 }
 
