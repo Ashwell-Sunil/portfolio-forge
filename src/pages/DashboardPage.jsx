@@ -196,7 +196,7 @@ export default function DashboardPage() {
 
         {/* Options Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Card 1: Continue Recent Portfolio (if exists) */}
+          {/* Card 1: User's Saved Portfolio OR Demo Portfolio */}
           {recentPortfolio ? (
             <div
               onClick={handleContinueRecent}
@@ -209,11 +209,11 @@ export default function DashboardPage() {
                       <Clock size={20} />
                     </div>
                     <span className="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider bg-[#EAF0EA] text-[#2B4C2B] border border-[#D3DFD3]">
-                      Recent Portfolio
+                      Your Portfolio
                     </span>
                   </div>
 
-                  {/* Clean Delete Button */}
+                  {/* Delete Button */}
                   <button
                     type="button"
                     onClick={handleDeleteRecent}
@@ -257,7 +257,7 @@ export default function DashboardPage() {
 
               <div className="pt-6 mt-6 border-t border-[#EFE9E0] flex items-center justify-between">
                 <span className="text-xs font-bold text-[#447244]">
-                  Continue Previous Work
+                  Continue Editing
                 </span>
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-white bg-[#447244] transition-transform group-hover:translate-x-1">
                   <ArrowRight size={14} />
@@ -265,14 +265,58 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : (
-            <div className="p-6 rounded-2xl border border-[#E2DCD2] bg-[#FFFFFF] flex flex-col justify-center items-center text-center space-y-2 opacity-80 shadow-sm">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center mb-1 bg-[#F4EFEA] text-[#6B7A6E]">
-                <Clock size={18} />
+            <div
+              onClick={handleLoadSample}
+              className="group p-6 rounded-2xl border border-[#E2DCD2] hover:border-[#447244] bg-[#FFFFFF] transition-all duration-200 hover:scale-[1.02] cursor-pointer relative overflow-hidden flex flex-col justify-between shadow-md hover:shadow-xl hover:shadow-[#447244]/10"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-[#447244] shadow-sm">
+                      <Sparkles size={20} />
+                    </div>
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider bg-[#EAF0EA] text-[#2B4C2B] border border-[#D3DFD3]">
+                      Demo Portfolio
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-semibold text-[#447244] bg-[#EAF0EA] px-2.5 py-0.5 rounded-full">
+                    Interactive Sample
+                  </span>
+                </div>
+
+                <h3 className="text-lg font-bold mb-1 text-[#1B2A1B]">
+                  Sample Layout - Explore Features
+                </h3>
+                <p className="text-xs font-semibold mb-3 text-[#447244]">
+                  Senior Distributed Systems & Cloud Architect
+                </p>
+
+                <p className="text-xs leading-relaxed line-clamp-2 mb-4 text-[#4A584A]">
+                  Pre-configured sample portfolio with cloud infrastructure projects, Stanford degrees, and CKS certifications to showcase the theme engine and layout.
+                </p>
+
+                <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#6B7A6E]">
+                  <span className="px-2.5 py-1 rounded-full border border-[#E2DCD2] bg-[#F7F4EE] text-[#4A584A] flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full inline-block bg-[#447244]" />
+                    <span>Sage & Olive (Botanical)</span>
+                  </span>
+                  <span className="px-2.5 py-1 rounded-full border border-[#E2DCD2] bg-[#F7F4EE] text-[#4A584A]">
+                    📁 3 Projects
+                  </span>
+                  <span className="px-2.5 py-1 rounded-full border border-[#E2DCD2] bg-[#F7F4EE] text-[#4A584A]">
+                    ⚡ 12 Skills
+                  </span>
+                </div>
               </div>
-              <p className="text-sm font-bold text-[#1B2A1B]">No Recent Portfolio</p>
-              <p className="text-xs max-w-xs text-[#4A584A]">
-                You haven't saved a portfolio yet. Click "Create New Portfolio" to start with a clean slate.
-              </p>
+
+              <div className="pt-6 mt-6 border-t border-[#EFE9E0] flex items-center justify-between">
+                <span className="text-xs font-bold text-[#447244]">
+                  Explore Demo Features
+                </span>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white bg-[#447244] transition-transform group-hover:translate-x-1">
+                  <ArrowRight size={14} />
+                </div>
+              </div>
             </div>
           )}
 
@@ -328,7 +372,7 @@ export default function DashboardPage() {
                     Load Distributed Systems Sample Dataset
                   </h4>
                   <p className="text-xs text-[#4A584A]">
-                    Pre-fills Alex Vance's cloud infrastructure projects, Stanford degrees, and CKS certifications.
+                    Pre-fills the Sample Layout with cloud infrastructure projects, Stanford degrees, and CKS certifications.
                   </p>
                 </div>
               </div>

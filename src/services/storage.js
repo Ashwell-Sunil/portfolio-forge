@@ -57,7 +57,7 @@ export const defaultPortfolioData = {
   themeId: 'sage-cream',
   layout: 'classic',
   profile: {
-    name: 'Alex Vance',
+    name: 'Sample Layout - Explore Features',
     title: 'Senior Distributed Systems & Cloud Architect',
     about: 'Specializing in high-throughput distributed architectures, real-time telemetry systems, and resilient cloud-native infrastructure. Passionate about systems programming, performance engineering, and open-source tooling.',
     imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
@@ -66,7 +66,7 @@ export const defaultPortfolioData = {
     linkedin: 'https://linkedin.com/in/alex-vance-eng',
     twitter: 'https://x.com/alexvance_dev',
     resumeLink: 'https://example.com/alex-vance-resume.pdf',
-    slug: 'alex-vance',
+    slug: 'sample-portfolio',
   },
   education: [
     {

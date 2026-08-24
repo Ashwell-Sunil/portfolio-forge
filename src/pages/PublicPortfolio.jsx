@@ -39,7 +39,7 @@ export default function PublicPortfolio() {
       const localSlug = (localData?.profile?.slug || generateSlug(localData?.profile?.name || '')).toLowerCase();
 
       // If user requested the sample slug
-      if (normalizedUser === 'alex-vance') {
+      if (normalizedUser === 'alex-vance' || normalizedUser === 'sample-portfolio' || normalizedUser === 'sample') {
         if (!cancelled) {
           setData(defaultPortfolioData);
           setState('done');
