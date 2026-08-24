@@ -29,38 +29,104 @@ export default function EditorWorkspace() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('new') === 'true') {
-      dispatch({
-        type: 'RESET',
-        payload: {
-          ...blankPortfolioData,
-          themeId: DEFAULT_THEME_ID,
-          layout: 'classic',
-        },
-      });
+      const freshData = {
+        ...blankPortfolioData,
+        uid: user?.uid,
+        userId: user?.uid,
+        ownerId: user?.uid,
+        creatorId: user?.uid,
+        themeId: DEFAULT_THEME_ID,
+        layout: 'classic',
+      };
+      dispatch({ type: 'RESET', payload: freshData });
+      if (user?.uid) {
+        savePortfolio(freshData, user.uid);
+      }
       window.history.replaceState({}, '', '/editor');
     } else if (params.get('sample') === 'true') {
-      dispatch({ type: 'RESET', payload: defaultPortfolioData });
+      const sampleData = {
+        ...defaultPortfolioData,
+        uid: user?.uid,
+        userId: user?.uid,
+        ownerId: user?.uid,
+        creatorId: user?.uid,
+      };
+      dispatch({ type: 'RESET', payload: sampleData });
+      if (user?.uid) {
+        savePortfolio(sampleData, user.uid);
+      }
       window.history.replaceState({}, '', '/editor');
     }
-  }, [location.search, dispatch]);
+  }, [location.search, dispatch, user?.uid]);
 
-  useAutoSave(portfolioData);
+  useAutoSave(portfolioData, user?.uid);
 
   const currentTheme = getTheme(portfolioData?.themeId);
   const editorCssVars = themeToEditorCssVars(currentTheme);
 
   useEffect(() => {
-    // Only load remote data if user did not explicitly request a blank/sample workspace in this session
+    // Only load remote/cached data if user did not explicitly request a blank/sample workspace in this session
     const params = new URLSearchParams(location.search);
     if (params.get('new') === 'true' || params.get('sample') === 'true') return undefined;
+    if (!user?.uid) return undefined;
 
-    if (!user?.uid || user.isDemo || !isFirebaseConfigured) return undefined;
     let cancelled = false;
-    loadPortfolioByUid(user.uid)
-      .then((remote) => {
-        if (!cancelled && remote) dispatch({ type: 'RESET', payload: remote });
-      })
-      .catch(() => {});
+
+    async function loadWorkspaceData() {
+      let foundData = null;
+
+      // 1. Fetch user's own portfolio from Firestore
+      if (isFirebaseConfigured && !user.isDemo) {
+        try {
+          const remote = await loadPortfolioByUid(user.uid);
+          if (
+            remote &&
+            (remote.uid === user.uid || remote.userId === user.uid || remote.ownerId === user.uid)
+          ) {
+            foundData = remote;
+            savePortfolio(remote, user.uid);
+          }
+        } catch (e) {
+          console.warn('Firestore workspace fetch error:', e);
+        }
+      }
+
+      // 2. If no remote portfolio, check user-scoped local storage
+      if (!foundData) {
+        try {
+          const local = loadPortfolio(user.uid);
+          if (
+            local &&
+            (local.uid === user.uid || local.userId === user.uid || local.ownerId === user.uid) &&
+            (local.profile?.name || local.projects?.length > 0)
+          ) {
+            foundData = local;
+          }
+        } catch (e) {
+          console.warn('Local workspace fetch error:', e);
+        }
+      }
+
+      // 3. If no portfolio belongs to this user yet, initialize a clean workspace stamped with their user ID
+      if (!foundData) {
+        foundData = {
+          ...blankPortfolioData,
+          uid: user.uid,
+          userId: user.uid,
+          ownerId: user.uid,
+          creatorId: user.uid,
+          themeId: DEFAULT_THEME_ID,
+          layout: 'classic',
+        };
+      }
+
+      if (!cancelled) {
+        dispatch({ type: 'RESET', payload: foundData });
+      }
+    }
+
+    loadWorkspaceData();
+
     return () => {
       cancelled = true;
     };
@@ -77,21 +143,23 @@ export default function EditorWorkspace() {
     }
 
     setPublishing(true);
+    const targetUid = user?.uid || portfolioData.uid || portfolioData.userId;
     const dataToSave = {
       ...portfolioData,
-      uid: user?.uid || portfolioData.uid,
-      ownerId: user?.uid || portfolioData.ownerId,
-      userId: user?.uid || portfolioData.userId,
+      uid: targetUid,
+      ownerId: targetUid,
+      userId: targetUid,
+      creatorId: targetUid,
     };
-    savePortfolio(dataToSave);
+    savePortfolio(dataToSave, targetUid);
 
     const slug = (portfolioData.profile?.slug || generateSlug(portfolioData.profile?.name))
       .toLowerCase()
       .replace(/[^a-z0-9-]/g, '');
 
     try {
-      if (isFirebaseConfigured && user?.uid && !user.isDemo) {
-        const { username } = await savePortfolioToFirestore(user.uid, dataToSave);
+      if (isFirebaseConfigured && targetUid && !user?.isDemo) {
+        const { username } = await savePortfolioToFirestore(targetUid, dataToSave);
         setPublishModal({
           url: `${window.location.origin}/${username}`,
           slug: username,

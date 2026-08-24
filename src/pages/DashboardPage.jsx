@@ -18,7 +18,7 @@ import FolioVitaeLogo from '../components/brand/Logo';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [recentPortfolio, setRecentPortfolio] = useState(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
@@ -28,27 +28,50 @@ export default function DashboardPage() {
     let cancelled = false;
 
     async function checkExisting() {
-      let foundData = null;
-
-      // 1. Check local storage
-      try {
-        const local = loadPortfolio();
-        if (local && (local.profile?.name || local.profile?.title || local.projects?.length > 0)) {
-          foundData = local;
+      if (!user?.uid) {
+        if (!cancelled) {
+          setRecentPortfolio(null);
+          setLoading(false);
         }
-      } catch (err) {
-        console.warn('Local storage check error:', err);
+        return;
       }
 
-      // 2. Check Firestore if authenticated
-      if (isFirebaseConfigured && user?.uid && !user.isDemo) {
+      setLoading(true);
+      let foundData = null;
+
+      // 1. Fetch from Firestore for the currently authenticated user
+      if (isFirebaseConfigured && !user.isDemo) {
         try {
           const remote = await loadPortfolioByUid(user.uid);
-          if (remote && (remote.profile?.name || remote.projects?.length > 0)) {
+          // Strict user isolation check: ensure remote portfolio belongs to this user
+          if (
+            remote &&
+            (remote.uid === user.uid || remote.userId === user.uid || remote.ownerId === user.uid) &&
+            (remote.profile?.name || remote.projects?.length > 0)
+          ) {
             foundData = remote;
+            // Cache into user-scoped local storage
+            savePortfolio(remote, user.uid);
           }
         } catch (err) {
           console.warn('Firestore fetch error:', err);
+        }
+      }
+
+      // 2. If no remote found, check user-scoped local cache ONLY
+      if (!foundData) {
+        try {
+          const local = loadPortfolio(user.uid);
+          // Strict validation: must match current user
+          if (
+            local &&
+            (local.uid === user.uid || local.userId === user.uid || local.ownerId === user.uid) &&
+            (local.profile?.name || local.profile?.title || local.projects?.length > 0)
+          ) {
+            foundData = local;
+          }
+        } catch (err) {
+          console.warn('Local storage check error:', err);
         }
       }
 
@@ -63,7 +86,7 @@ export default function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [user?.uid, user?.isDemo]);
 
   const handleContinueRecent = () => {
     navigate('/editor');
@@ -85,8 +108,8 @@ export default function DashboardPage() {
 
     setDeleting(true);
     try {
-      // 1. Clear from localStorage
-      clearPortfolio();
+      // 1. Clear from user-scoped localStorage
+      clearPortfolio(user?.uid);
 
       // 2. Delete from Firestore if connected
       if (isFirebaseConfigured && user?.uid && !user.isDemo) {
@@ -133,6 +156,14 @@ export default function DashboardPage() {
             <span className="text-xs font-medium px-3.5 py-1.5 rounded-full border border-[#E2DCD2] bg-[#FFFFFF] text-[#4A584A] shadow-sm hidden sm:inline-block">
               👤 {user?.displayName || user?.email || 'Active Workspace Session'}
             </span>
+            <button
+              type="button"
+              onClick={signOut}
+              className="text-xs font-semibold px-3 py-1.5 rounded-full border border-[#E2DCD2] bg-[#FFFFFF] hover:bg-[#F5F0E8] text-[#718096] hover:text-[#C53030] transition-all cursor-pointer"
+              title="Sign out"
+            >
+              Sign Out
+            </button>
             <Link
               to="/editor"
               className="text-xs font-bold px-4 py-2 rounded-full text-white bg-[#447244] hover:bg-[#365D36] shadow-md shadow-[#447244]/25 transition-all hover:scale-105"

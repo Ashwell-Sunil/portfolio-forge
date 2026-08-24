@@ -21,7 +21,7 @@ export default function PublicPortfolio() {
       // 1. Check local storage first (instant access for active editor session)
       let localData = null;
       try {
-        localData = loadPortfolio();
+        localData = loadPortfolio(user?.uid);
       } catch (e) {
         console.warn('Could not read local storage:', e);
       }
@@ -104,7 +104,7 @@ export default function PublicPortfolio() {
       cancelled = true;
       clearTimeout(safetyTimer);
     };
-  }, [username]);
+  }, [username, user?.uid]);
 
   const activeTheme = getTheme(data?.themeId || 'sage-cream');
   const cssVars = themeToCssVars(activeTheme);

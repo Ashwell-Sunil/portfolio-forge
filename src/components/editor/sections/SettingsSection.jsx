@@ -14,35 +14,37 @@ export default function SettingsSection({ onPublish }) {
 
   const handleResetSample = () => {
     if (window.confirm('Reset all fields to the sample engineer portfolio?')) {
-      dispatch({ type: 'RESET', payload: defaultPortfolioData });
+      const sampleData = {
+        ...defaultPortfolioData,
+        uid: user?.uid,
+        userId: user?.uid,
+        ownerId: user?.uid,
+        creatorId: user?.uid,
+      };
+      dispatch({ type: 'RESET', payload: sampleData });
+      if (user?.uid) {
+        savePortfolio(sampleData, user.uid);
+      }
     }
   };
 
   const handleClearAll = () => {
     if (window.confirm('Clear all portfolio data and start from scratch?')) {
+      const cleanData = {
+        ...blankPortfolioData,
+        uid: user?.uid,
+        userId: user?.uid,
+        ownerId: user?.uid,
+        creatorId: user?.uid,
+        themeId: portfolioData.themeId || 'sage-cream',
+      };
       dispatch({
         type: 'RESET',
-        payload: {
-          themeId: portfolioData.themeId || 'sage-cream',
-          profile: {
-            name: '',
-            title: '',
-            about: '',
-            imageUrl: '',
-            email: '',
-            github: '',
-            linkedin: '',
-            twitter: '',
-            resumeLink: '',
-            slug: '',
-          },
-          education: [],
-          experience: [],
-          projects: [],
-          skills: [],
-          certifications: [],
-        },
+        payload: cleanData,
       });
+      if (user?.uid) {
+        savePortfolio(cleanData, user.uid);
+      }
     }
   };
 

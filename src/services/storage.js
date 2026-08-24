@@ -162,32 +162,83 @@ export const defaultPortfolioData = {
 };
 
 // ─── Local Storage Operations ───────────────────────────────────────────────
-export function loadPortfolio() {
+export function getUserStorageKey(uid) {
+  if (!uid || uid === 'guest') return 'foliovitae_data_guest';
+  return `foliovitae_data_${uid}`;
+}
+
+export function loadPortfolio(uid) {
   try {
-    let raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+    // If a specific user ID is provided, query that user's scoped storage
+    if (uid) {
+      const userKey = getUserStorageKey(uid);
+      const rawUser = localStorage.getItem(userKey);
+      if (rawUser) {
+        const parsed = JSON.parse(rawUser);
+        if (parsed && (parsed.uid === uid || parsed.userId === uid || parsed.ownerId === uid || !parsed.uid)) {
+          return {
+            ...defaultPortfolioData,
+            ...parsed,
+            uid,
+            userId: uid,
+            ownerId: uid,
+          };
+        }
+      }
+
+      // Check legacy single-user keys ONLY if it belongs to this exact user
+      const rawLegacy = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (rawLegacy) {
+        const parsedLegacy = JSON.parse(rawLegacy);
+        if (parsedLegacy && (parsedLegacy.uid === uid || parsedLegacy.userId === uid || parsedLegacy.ownerId === uid)) {
+          return {
+            ...defaultPortfolioData,
+            ...parsedLegacy,
+            uid,
+            userId: uid,
+            ownerId: uid,
+          };
+        }
+      }
+
+      // No data exists for this specific user
+      return null;
     }
-    if (!raw) return defaultPortfolioData;
-    return { ...defaultPortfolioData, ...JSON.parse(raw) };
+
+    // Fallback for unauthenticated visitor previewing sample
+    const rawGuest = localStorage.getItem('foliovitae_data_guest');
+    if (rawGuest) {
+      return { ...defaultPortfolioData, ...JSON.parse(rawGuest) };
+    }
+    return defaultPortfolioData;
   } catch (err) {
     console.error('Failed to load portfolio from localStorage:', err);
-    return defaultPortfolioData;
+    return uid ? null : defaultPortfolioData;
   }
 }
 
-export function savePortfolio(data) {
+export function savePortfolio(data, uid) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const targetUid = uid || data?.uid || data?.userId || data?.ownerId;
+    const userKey = getUserStorageKey(targetUid);
+    const stampedData = {
+      ...data,
+      ...(targetUid ? { uid: targetUid, userId: targetUid, ownerId: targetUid } : {}),
+    };
+    localStorage.setItem(userKey, JSON.stringify(stampedData));
   } catch (err) {
     console.error('Failed to save portfolio to localStorage:', err);
   }
 }
 
-export function clearPortfolio() {
+export function clearPortfolio(uid) {
   try {
+    if (uid) {
+      localStorage.removeItem(getUserStorageKey(uid));
+    }
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(LEGACY_STORAGE_KEY);
+    localStorage.removeItem('foliovitae_data_guest');
   } catch (err) {
     console.error('Failed to clear portfolio:', err);
   }

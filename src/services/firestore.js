@@ -33,6 +33,10 @@ function stripUndefined(value) {
 
 export async function savePortfolioToFirestore(uid, portfolioData) {
   assertDb();
+  if (!uid) {
+    throw new Error('User ID is required to save portfolio');
+  }
+
   const username = (portfolioData.profile?.slug || generateSlug(portfolioData.profile?.name) || uid)
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, '');
@@ -48,21 +52,81 @@ export async function savePortfolioToFirestore(uid, portfolioData) {
     publishedAt: serverTimestamp(),
   });
 
+  // Save to primary user portfolio document
   await setDoc(doc(db, 'portfolios', uid), payload, { merge: true });
-  await setDoc(doc(db, 'usernames', username), { uid, updatedAt: serverTimestamp() }, { merge: true });
+
+  // Save slug alias pointing to this user
+  await setDoc(doc(db, 'usernames', username), {
+    uid,
+    userId: uid,
+    ownerId: uid,
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
 
   return { uid, username };
 }
 
 export async function loadPortfolioByUid(uid) {
   assertDb();
-  const snap = await getDoc(doc(db, 'portfolios', uid));
-  if (!snap.exists()) return null;
-  return snap.data();
+  if (!uid) return null;
+
+  try {
+    // 1. Direct document lookup by User ID
+    const snap = await getDoc(doc(db, 'portfolios', uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      // Strict ownership check: only return if document belongs to this user
+      if (
+        data.uid === uid ||
+        data.userId === uid ||
+        data.ownerId === uid ||
+        data.creatorId === uid
+      ) {
+        return data;
+      }
+    }
+
+    // 2. Query collection where userId matches
+    const qUserId = query(collection(db, 'portfolios'), where('userId', '==', uid), limit(1));
+    const resUserId = await getDocs(qUserId);
+    if (!resUserId.empty) {
+      const data = resUserId.docs[0].data();
+      if (data.uid === uid || data.userId === uid || data.ownerId === uid) {
+        return data;
+      }
+    }
+
+    // 3. Query collection where ownerId matches
+    const qOwnerId = query(collection(db, 'portfolios'), where('ownerId', '==', uid), limit(1));
+    const resOwnerId = await getDocs(qOwnerId);
+    if (!resOwnerId.empty) {
+      const data = resOwnerId.docs[0].data();
+      if (data.uid === uid || data.userId === uid || data.ownerId === uid) {
+        return data;
+      }
+    }
+
+    // 4. Query collection where uid field matches
+    const qUid = query(collection(db, 'portfolios'), where('uid', '==', uid), limit(1));
+    const resUid = await getDocs(qUid);
+    if (!resUid.empty) {
+      const data = resUid.docs[0].data();
+      if (data.uid === uid || data.userId === uid || data.ownerId === uid) {
+        return data;
+      }
+    }
+
+    return null;
+  } catch (err) {
+    console.warn('loadPortfolioByUid query error:', err);
+    return null;
+  }
 }
 
 export async function deletePortfolioFromFirestore(uid, username) {
   assertDb();
+  if (!uid) return;
+
   if (uid) {
     try {
       await deleteDoc(doc(db, 'portfolios', uid));
@@ -73,7 +137,14 @@ export async function deletePortfolioFromFirestore(uid, username) {
   if (username) {
     try {
       const key = String(username).toLowerCase().replace(/[^a-z0-9-]/g, '');
-      await deleteDoc(doc(db, 'usernames', key));
+      const alias = await getDoc(doc(db, 'usernames', key));
+      // Only delete username mapping if it belongs to this user
+      if (alias.exists()) {
+        const aliasData = alias.data();
+        if (aliasData.uid === uid || aliasData.userId === uid || aliasData.ownerId === uid) {
+          await deleteDoc(doc(db, 'usernames', key));
+        }
+      }
     } catch (e) {
       console.warn('Could not delete username doc:', e);
     }
