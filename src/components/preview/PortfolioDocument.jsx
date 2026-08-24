@@ -1018,32 +1018,31 @@ export default function PortfolioDocument({ data: propData }) {
                     return (
                       <div
                         key={proj.id}
-                        className="p-4 rounded-xl transition-all duration-200 flex flex-col justify-between"
-                        style={{
-                          background: 'rgba(255,255,255,0.45)',
-                          border: `1px solid ${t.border}`,
-                        }}
+                        className="p-4 rounded-xl transition-all duration-200 flex flex-col justify-between bg-slate-900 border border-slate-700/60 shadow-lg hover:border-slate-600 hover:shadow-xl"
                       >
                         <div>
                           {proj.imageUrl && (
                             <img
                               src={normalizeImageUrl(proj.imageUrl)}
-                              alt={proj.title}
-                              className="w-full h-32 object-cover rounded-lg mb-2.5 cursor-pointer"
+                              alt={proj.title || 'Project preview'}
+                              className="w-full h-32 object-cover rounded-lg mb-2.5 cursor-pointer border border-slate-700/50 hover:opacity-90 transition-opacity"
                               onClick={() => openGallery(normalizeImageUrl(proj.imageUrl))}
                             />
                           )}
                           <div className="flex items-start justify-between gap-2 mb-1">
-                            <h4 style={{ fontFamily: displayFont, fontWeight: 700, fontSize: '1rem', color: t.text, margin: 0 }}>
+                            <h4
+                              className="text-white font-bold text-[15px] leading-snug tracking-tight m-0"
+                              style={{ fontFamily: displayFont }}
+                            >
                               {proj.title}
                             </h4>
                             {proj.featured && (
-                              <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', borderRadius: '12px', background: t.tag.bg, color: t.tag.text, border: `1px solid ${t.tag.border}` }}>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40 shrink-0">
                                 ★
                               </span>
                             )}
                           </div>
-                          <p style={{ fontSize: '0.86rem', color: t.text2, lineHeight: '1.6', margin: '0 0 10px' }}>
+                          <p className="text-slate-300 text-sm leading-relaxed mb-3">
                             {proj.description}
                           </p>
                           {stackList.length > 0 && (
@@ -1051,15 +1050,7 @@ export default function PortfolioDocument({ data: propData }) {
                               {stackList.map((tech) => (
                                 <span
                                   key={tech}
-                                  className="backdrop-blur-sm"
-                                  style={{
-                                    fontSize: '0.74rem',
-                                    padding: '2px 8px',
-                                    borderRadius: '16px',
-                                    background: t.techTag?.bg || t.tag.bg,
-                                    color: t.techTag?.text || t.tag.text,
-                                    border: `1px solid ${t.techTag?.border || t.tag.border}`,
-                                  }}
+                                  className="text-xs font-medium px-2 py-0.5 rounded-md bg-slate-800 text-slate-200 border border-slate-700/70"
                                 >
                                   {tech}
                                 </span>
@@ -1068,8 +1059,14 @@ export default function PortfolioDocument({ data: propData }) {
                           )}
                         </div>
                         {projLink && (
-                          <a href={projLink} target="_blank" rel="noopener noreferrer" className="text-xs font-bold pt-1" style={{ color: t.accent, textDecoration: 'none' }}>
-                            View Project →
+                          <a
+                            href={projLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors pt-1"
+                          >
+                            <span>View Project</span>
+                            <span aria-hidden="true">→</span>
                           </a>
                         )}
                       </div>
