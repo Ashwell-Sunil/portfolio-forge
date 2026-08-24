@@ -1,5 +1,5 @@
 /**
- * PortfolioForge 10 Curated Aesthetic & Pastel Themes
+ * Folio Vitae 10 Curated Aesthetic & Pastel Themes
  * Distinct, richly-tinted surfaces, dual-tone linear card gradients,
  * layered soft ambient box shadows, dedicated SVG watermarks, and dynamic Editor UI syncing.
  */

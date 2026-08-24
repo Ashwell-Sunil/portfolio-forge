@@ -1,5 +1,5 @@
 /**
- * PortfolioForge 10 Diverse, Theme-Specific SVG Background Graphics
+ * Folio Vitae 10 Diverse, Theme-Specific SVG Background Graphics
  * Each theme has a completely unique, thematically accurate SVG pattern.
  * Opacity calibrated to 0.08 - 0.14 for noticeable visual depth and perfect legibility.
  */

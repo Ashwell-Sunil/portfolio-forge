@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'PortfolioForge',
-        short_name: 'PortfolioForge',
-        description: 'Build a stunning developer portfolio in minutes',
+        name: 'Folio Vitae',
+        short_name: 'Folio Vitae',
+        description: 'Build an elegant developer portfolio in minutes',
         theme_color: '#0b0f1a',
         background_color: '#0b0f1a',
         display: 'standalone',

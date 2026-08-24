@@ -7,7 +7,7 @@ const AuthContext = createContext(null);
 const DEMO_USER = {
   uid: 'demo-local-user',
   displayName: 'Demo Engineer',
-  email: 'demo@portfolioforge.local',
+  email: 'demo@foliovitae.local',
   photoURL: '',
   isDemo: true,
 };

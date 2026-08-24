@@ -9,7 +9,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { THEMES } from '../themes/themes';
-import PortfolioForgeLogo from '../components/brand/Logo';
+import FolioVitaeLogo from '../components/brand/Logo';
 
 export default function LandingPage() {
   const [activeThemeId, setActiveThemeId] = useState('sage-cream');
@@ -41,8 +41,8 @@ export default function LandingPage() {
       >
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="group" title="PortfolioForge">
-            <PortfolioForgeLogo
+          <Link to="/" className="group" title="Folio Vitae">
+            <FolioVitaeLogo
               size={34}
               subtitle="Workspace"
               textColor={activeTheme.colors.text}
@@ -304,13 +304,13 @@ export default function LandingPage() {
       >
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <PortfolioForgeLogo
+            <FolioVitaeLogo
               size={22}
               showText={true}
               textColor={activeTheme.colors.text}
               accentColor={activeTheme.colors.accent}
             />
-            <span>— The Creative Cloud Portfolio Workspace</span>
+            <span>— The Elegant Portfolio Workspace</span>
           </div>
 
           <div className="flex items-center gap-6">

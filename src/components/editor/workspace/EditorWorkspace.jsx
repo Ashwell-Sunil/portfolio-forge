@@ -12,7 +12,7 @@ import LeftToolbar from './LeftToolbar';
 import PropertyPanel from './PropertyPanel';
 import CanvasPanel from './CanvasPanel';
 import Toast from '../../shell/Toast';
-import PortfolioForgeLogo from '../../brand/Logo';
+import FolioVitaeLogo from '../../brand/Logo';
 
 export default function EditorWorkspace() {
   const location = useLocation();
@@ -136,7 +136,7 @@ export default function EditorWorkspace() {
         {/* Brand & App Title */}
         <div className="flex items-center gap-3">
           <Link to="/" className="group" title="Return to Home">
-            <PortfolioForgeLogo
+            <FolioVitaeLogo
               size={24}
               showText={true}
               textColor="var(--pf-text-primary, #1B2A1B)"

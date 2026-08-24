@@ -927,8 +927,8 @@ export default function PortfolioDocument({ data: propData }) {
       {/* ── Footer ── */}
       <footer className="relative z-[2] py-10 text-center" style={{ borderTop: `1px solid ${t.footerBorder || t.border}` }}>
         <p style={{ fontSize: '0.85rem', color: t.footerText || t.text3, fontFamily: bodyFont }}>
-          Built with <span style={{ color: t.accent, fontWeight: 700 }}>PortfolioForge</span>
-          {slug && <> · portfolioforge.app/<span style={{ color: t.accent, fontWeight: 600 }}>{slug}</span></>}
+          Built with <span style={{ color: t.accent, fontWeight: 700 }}>Folio Vitae</span>
+          {slug && <> · foliovitae.app/<span style={{ color: t.accent, fontWeight: 600 }}>{slug}</span></>}
         </p>
       </footer>
 

@@ -52,7 +52,7 @@ export default function PreviewPane() {
             className="text-[11px] font-mono tracking-tight transition-colors duration-300"
             style={{ color: isLight ? '#6b7280' : '#64748b' }}
           >
-            portfolioforge.app/
+            foliovitae.app/
             <span style={{ color: theme.colors.accent }}>preview</span>
           </span>
 

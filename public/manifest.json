@@ -1,7 +1,7 @@
 {
-  "name": "portfolioforge",
-  "short_name": "PortfolioForge",
-  "description": "Premium personal portfolio builder for developers",
+  "name": "Folio Vitae",
+  "short_name": "Folio Vitae",
+  "description": "Elegant personal portfolio workspace for developers",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0b0f1a",

@@ -378,7 +378,7 @@ ${profile.imageUrl ? `<meta property="og:image" content="${profile.imageUrl}">` 
   <div class="body">
     ${aboutHtml}${eduHtml}${expHtml}${projHtml}${skillsHtml}${certsHtml}
     <footer>
-      <p>Built with <span class="brand">PortfolioForge</span></p>
+      <p>Built with <span class="brand">Folio Vitae</span></p>
     </footer>
   </div>
 </article>

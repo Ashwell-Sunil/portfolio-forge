@@ -1,9 +1,9 @@
-# PortfolioForge ✦
+# Folio Vitae ✦
 
-PortfolioForge is a 100% serverless, client-side web application designed to let anyone build, preview, and share a stunning professional portfolio instantly — directly from their browser, with zero backend infrastructure required.
+Folio Vitae is an elegant web workspace designed to let engineers and creators build, preview, and share a stunning professional portfolio instantly — with live pastel themes, customizable layouts, and cloud synchronization.
 
 ## 🎯 The Vision
-The goal of PortfolioForge is ultimate portability. It is compiled into a **single, standalone HTML file**. This means anyone can host it anywhere (GitHub Pages, Netlify, or just open it locally), create their own profile, and share it globally without needing a database or server.
+The goal of Folio Vitae is ultimate elegance and portability. Craft your developer presence with curated aesthetic themes, responsive layouts, and publish live in seconds.
 
 ## ✨ Core Features
 
@@ -29,9 +29,8 @@ The goal of PortfolioForge is ultimate portability. It is compiled into a **sing
 
 ## 🚀 How to Deploy
 
-Because PortfolioForge is completely serverless, deployment takes seconds:
+Because Folio Vitae is fully client-side optimized, deployment takes seconds:
 
 1.  Run `npm run build` in your terminal.
-2.  Take the `index.html` file generated in the `dist/` folder.
-3.  Upload that single file to **GitHub Pages**, **Vercel**, or **Netlify**.
-4.  Your application is now live globally! Anyone can visit your link, use the editor to create their own portfolio, and generate their own share links.
+2.  Deploy to **Vercel**, **GitHub Pages**, or **Netlify**.
+3.  Your application is now live globally! Anyone can visit your link, use the editor to create their own portfolio, and publish live URLs.

@@ -14,7 +14,7 @@ import { loadPortfolioByUid, deletePortfolioFromFirestore } from '../services/fi
 import { isFirebaseConfigured } from '../services/firebase';
 import { getTheme, DEFAULT_THEME_ID } from '../themes/themes';
 import Toast from '../components/shell/Toast';
-import PortfolioForgeLogo from '../components/brand/Logo';
+import FolioVitaeLogo from '../components/brand/Logo';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -120,7 +120,7 @@ export default function DashboardPage() {
       <header className="sticky top-0 z-40 backdrop-blur-md bg-[#FAF7F2]/85 border-b border-[#E2DCD2]">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="group" title="Return to Home">
-            <PortfolioForgeLogo
+            <FolioVitaeLogo
               size={34}
               subtitle="Dashboard"
               textColor="#1B2A1B"

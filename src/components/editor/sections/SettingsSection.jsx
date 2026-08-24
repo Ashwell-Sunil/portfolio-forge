@@ -108,7 +108,7 @@ export default function SettingsSection({ onPublish }) {
           }}
         >
           <Link2 size={13} style={{ color: 'var(--pf-ui-accent, #447244)' }} className="shrink-0" />
-          <span className="truncate font-mono">portfolioforge.app<strong style={{ color: 'var(--pf-text-primary, #1B2A1B)' }}>{publicPath}</strong></span>
+          <span className="truncate font-mono">foliovitae.app<strong style={{ color: 'var(--pf-text-primary, #1B2A1B)' }}>{publicPath}</strong></span>
         </div>
 
         <p className="text-[10.5px] leading-relaxed" style={{ color: 'var(--pf-text-muted, #6B7A6E)' }}>

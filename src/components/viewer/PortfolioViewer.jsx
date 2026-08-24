@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { generatePortfolioHTML } from '../../utils/generatePortfolioHTML';
 import { useAuth } from '../../context/AuthContext';
-import PortfolioForgeLogo from '../brand/Logo';
+import FolioVitaeLogo from '../brand/Logo';
 
 export default function PortfolioViewer({ portfolioData, themeId, onBack, isOwner: explicitIsOwner }) {
   const iframeRef = useRef(null);
@@ -38,7 +38,7 @@ export default function PortfolioViewer({ portfolioData, themeId, onBack, isOwne
         style={{ background: 'rgba(11,15,26,0.95)', borderBottom: '1px solid #1f2d45', backdropFilter: 'blur(12px)' }}
       >
         <div className="flex items-center gap-3">
-          <PortfolioForgeLogo size={22} textColor="#E2E8F0" accentColor="#38BDF8" />
+          <FolioVitaeLogo size={22} textColor="#E2E8F0" accentColor="#38BDF8" />
           <span className="text-forge-text-3 text-xs hidden sm:block">·</span>
           <span className="text-forge-text-3 text-xs hidden sm:block" style={{ color: '#94A3B8' }}>
             {portfolioData?.profile?.name || 'Portfolio'}

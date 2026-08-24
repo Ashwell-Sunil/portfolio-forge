@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import PortfolioForgeLogo from '../brand/Logo';
+import FolioVitaeLogo from '../brand/Logo';
 
 export default function LoginScreen({ redirectTo = '/editor' }) {
   const { signInWithGoogle, configured, error } = useAuth();
@@ -32,16 +32,16 @@ export default function LoginScreen({ redirectTo = '/editor' }) {
       >
         <div className="px-8 pt-8 pb-6 border-b" style={{ borderColor: '#EFE7DA' }}>
           <div className="mb-5">
-            <PortfolioForgeLogo
+            <FolioVitaeLogo
               size={36}
-              subtitle="Creative Cloud Workspace"
+              subtitle="Workspace"
               textColor="#2D3748"
               accentColor="#447244"
             />
           </div>
-          <h1 className="text-[22px] font-semibold text-[#2D3748] tracking-tight">Sign in to Editor</h1>
+          <h1 className="text-[22px] font-semibold text-[#2D3748] tracking-tight">Sign in to Folio Vitae</h1>
           <p className="text-[13px] text-[#718096] mt-2 leading-relaxed">
-            Access the Adobe-style portfolio workspace with live customizer and cloud publishing.
+            Sign in to your workspace to craft and manage your professional presence.
           </p>
         </div>
 

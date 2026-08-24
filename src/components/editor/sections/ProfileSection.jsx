@@ -60,7 +60,7 @@ export default function ProfileSection() {
             value={profile.slug}
             onChange={update('slug')}
             placeholder="alex-vance"
-            hint="portfolioforge.app/{slug}"
+            hint="foliovitae.app/{slug}"
           />
         </div>
 

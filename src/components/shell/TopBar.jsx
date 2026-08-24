@@ -50,14 +50,14 @@ export default function TopBar({ onSave, onShare, onPublish }) {
         borderBottom: '1px solid rgba(31,45,69,0.7)',
       }}
       role="banner"
-      aria-label="PortfolioForge navigation"
+      aria-label="Folio Vitae navigation"
     >
       {/* ── Logo ── */}
       <div className="flex items-center gap-2.5">
         <LogoMark />
         <div className="flex items-baseline gap-0.5">
-          <span className="font-display font-bold text-[13px] text-forge-text tracking-tight">Portfolio</span>
-          <span className="font-display font-bold text-[13px] gradient-text tracking-tight">Forge</span>
+          <span className="font-display font-bold text-[13px] text-forge-text tracking-tight">Folio</span>
+          <span className="font-display font-bold text-[13px] gradient-text tracking-tight">Vitae</span>
         </div>
         <span className="hidden sm:flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-forge-accent/10 text-forge-accent border border-forge-accent/20 tracking-widest ml-0.5">
           v0.3
@@ -82,8 +82,8 @@ export default function TopBar({ onSave, onShare, onPublish }) {
             className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
                        border border-forge-accent/30 text-forge-accent hover:bg-forge-accent/10
                        transition-all duration-200 active:scale-95 animate-install-pulse"
-            aria-label="Install PortfolioForge as an app"
-            title="Install PortfolioForge app"
+            aria-label="Install Folio Vitae as an app"
+            title="Install Folio Vitae app"
           >
             <DownloadIcon />
             {isInstalling ? 'Installing…' : 'Install App'}

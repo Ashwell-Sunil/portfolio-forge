@@ -1,8 +1,8 @@
 import React from 'react';
 
 /**
- * Clean & Simple Minimalist PortfolioForge Logo & Icon
- * Features an ultra-minimal geometric "PF" monogram on a rounded dark tile.
+ * Clean & Elegant Minimalist Folio Vitae Logo & Icon
+ * Features an ultra-minimal geometric "FV" monogram on a rounded dark tile.
  */
 export function LogoIcon({ size = 28, className = '', accentColor = '#447244' }) {
   return (
@@ -17,34 +17,40 @@ export function LogoIcon({ size = 28, className = '', accentColor = '#447244' })
     >
       {/* Clean Dark Rounded Tile */}
       <rect width="32" height="32" rx="8" fill="#18181B" />
-      
-      {/* P Stem & Loop */}
+
+      {/* F Stem & Bars */}
       <path
-        d="M10 8v16"
+        d="M8.5 8.5v15"
         stroke="#FFFFFF"
-        strokeWidth="2.5"
+        strokeWidth="2.2"
         strokeLinecap="round"
       />
       <path
-        d="M10 8h7.5a4 4 0 0 1 4 4v0a4 4 0 0 1-4 4H10"
+        d="M8.5 8.5h8"
         stroke="#FFFFFF"
-        strokeWidth="2.5"
+        strokeWidth="2.2"
         strokeLinecap="round"
-        strokeLinejoin="round"
+      />
+      <path
+        d="M8.5 15h5.5"
+        stroke="#FFFFFF"
+        strokeWidth="2.2"
+        strokeLinecap="round"
       />
 
-      {/* F Crossbar in Theme Accent */}
+      {/* V in Theme Accent */}
       <path
-        d="M10 16.5h6"
+        d="M17.5 13l3.5 10.5 4-10.5"
         stroke={accentColor || '#447244'}
-        strokeWidth="2.5"
+        strokeWidth="2.2"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
 }
 
-export default function PortfolioForgeLogo({
+export default function FolioVitaeLogo({
   size = 28,
   showText = true,
   subtitle,
@@ -62,7 +68,7 @@ export default function PortfolioForgeLogo({
             className="font-bold text-[15px] tracking-tight leading-tight transition-colors"
             style={{ color: textColor || 'currentColor' }}
           >
-            PortfolioForge
+            Folio Vitae
           </span>
           {subtitle && (
             <span
@@ -77,3 +83,6 @@ export default function PortfolioForgeLogo({
     </div>
   );
 }
+
+export { FolioVitaeLogo as PortfolioForgeLogo };
+

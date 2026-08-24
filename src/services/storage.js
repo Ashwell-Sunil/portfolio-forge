@@ -1,5 +1,6 @@
 // ─── Default & Clean Portfolio States ──────────────────────────────────────
-const STORAGE_KEY = 'portfolioforge_data_v1';
+const STORAGE_KEY = 'foliovitae_data_v1';
+const LEGACY_STORAGE_KEY = 'portfolioforge_data_v1';
 
 export const blankPortfolioData = {
   themeId: 'sage-cream',
@@ -163,7 +164,10 @@ export const defaultPortfolioData = {
 // ─── Local Storage Operations ───────────────────────────────────────────────
 export function loadPortfolio() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    let raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+    }
     if (!raw) return defaultPortfolioData;
     return { ...defaultPortfolioData, ...JSON.parse(raw) };
   } catch (err) {
@@ -183,6 +187,7 @@ export function savePortfolio(data) {
 export function clearPortfolio() {
   try {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
   } catch (err) {
     console.error('Failed to clear portfolio:', err);
   }

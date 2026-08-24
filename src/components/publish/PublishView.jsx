@@ -24,7 +24,7 @@ export default function PublishView({ onBack }) {
   const { portfolioData } = usePortfolio();
   const theme = getTheme(portfolioData.themeId);
   const slug = portfolioData.profile.slug || generateSlug(portfolioData.profile.name);
-  const publicUrl = `https://portfolioforge.app/${slug}`;
+  const publicUrl = `https://foliovitae.app/${slug}`;
 
   const handleCopyUrl = async () => {
     try {
@@ -61,7 +61,7 @@ export default function PublishView({ onBack }) {
             style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${theme.colors.border}` }}>
             <GlobeIcon />
             <span className="text-xs font-mono text-forge-text-2">
-              portfolioforge.app/<span style={{ color: theme.colors.accent }}>{slug}</span>
+              foliovitae.app/<span style={{ color: theme.colors.accent }}>{slug}</span>
             </span>
           </div>
 

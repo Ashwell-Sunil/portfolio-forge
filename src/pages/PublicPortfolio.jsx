@@ -200,7 +200,7 @@ export default function PublicPortfolio() {
             color: activeTheme.colors.text,
             boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
           }}
-          title="Back to PortfolioForge Home"
+          title="Back to Folio Vitae Home"
         >
           <ArrowLeft size={13} />
           <span className="hidden sm:inline">Home</span>
