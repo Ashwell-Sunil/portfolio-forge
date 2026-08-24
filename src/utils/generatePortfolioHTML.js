@@ -63,6 +63,9 @@ const THEMES = {
     dot: '#00ff41', dotGlow: 'rgba(0,255,65,0.8)', line: 'rgba(0,255,65,0.25)',
     footerBorder: 'rgba(0,255,65,0.15)', footerText: '#006618',
     badge: 'rgba(0,255,65,0.06)', badgeText: '#00cc33', badgeBorder: 'rgba(0,255,65,0.2)',
+    grid: true, glowOrbs: false, mono: true, scanlines: true, glass: false,
+    displayFont: "'Fira Code',monospace", bodyFont: "'Fira Code',monospace",
+  },
   'obsidian-ember': {
     pageBg: '#0f1115', heroBg: 'linear-gradient(135deg,#0f1115 0%,#15181f 60%,#1f232d 100%)',
     bodyBg: '#11141a', cardBg: '#181b22', cardBorder: '#2c303d',

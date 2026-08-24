@@ -42,7 +42,7 @@ function parseResponsibilities(text) {
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
-    .map((line) => line.replace(/^[•\-\*]\s*/, ''));
+    .map((line) => line.replace(/^[•\-*]\s*/, ''));
 }
 
 function formatDegree(edu) {

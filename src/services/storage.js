@@ -10,6 +10,8 @@ export const blankPortfolioData = {
     title: '',
     about: '',
     imageUrl: '',
+    imagePosition: 'right',
+    imageSize: 'md',
     email: '',
     github: '',
     linkedin: '',
@@ -17,41 +19,9 @@ export const blankPortfolioData = {
     resumeLink: '',
     slug: '',
   },
-  education: [
-    {
-      id: 'edu-1',
-      degree: '',
-      major: '',
-      institution: '',
-      startYear: '',
-      endYear: '',
-      startDate: '',
-      endDate: '',
-      gpa: '',
-    },
-  ],
-  experience: [
-    {
-      id: 'exp-1',
-      role: '',
-      company: '',
-      startDate: '',
-      endDate: '',
-      current: true,
-      responsibilities: '',
-    },
-  ],
-  projects: [
-    {
-      id: 'proj-1',
-      title: '',
-      description: '',
-      imageUrl: '',
-      techStack: [],
-      link: '',
-      featured: true,
-    },
-  ],
+  education: [],
+  experience: [],
+  projects: [],
   skills: [],
   certifications: [],
 };
@@ -186,8 +156,17 @@ export function loadPortfolio(uid) {
         const parsed = JSON.parse(rawUser);
         if (parsed && (parsed.uid === uid || parsed.userId === uid || parsed.ownerId === uid || !parsed.uid)) {
           return {
-            ...defaultPortfolioData,
+            ...blankPortfolioData,
             ...parsed,
+            profile: {
+              ...blankPortfolioData.profile,
+              ...(parsed.profile || {}),
+            },
+            education: Array.isArray(parsed.education) ? parsed.education : [],
+            experience: Array.isArray(parsed.experience) ? parsed.experience : [],
+            projects: Array.isArray(parsed.projects) ? parsed.projects : [],
+            skills: Array.isArray(parsed.skills) ? parsed.skills : [],
+            certifications: Array.isArray(parsed.certifications) ? parsed.certifications : [],
             uid,
             userId: uid,
             ownerId: uid,
@@ -201,8 +180,17 @@ export function loadPortfolio(uid) {
         const parsedLegacy = JSON.parse(rawLegacy);
         if (parsedLegacy && (parsedLegacy.uid === uid || parsedLegacy.userId === uid || parsedLegacy.ownerId === uid)) {
           return {
-            ...defaultPortfolioData,
+            ...blankPortfolioData,
             ...parsedLegacy,
+            profile: {
+              ...blankPortfolioData.profile,
+              ...(parsedLegacy.profile || {}),
+            },
+            education: Array.isArray(parsedLegacy.education) ? parsedLegacy.education : [],
+            experience: Array.isArray(parsedLegacy.experience) ? parsedLegacy.experience : [],
+            projects: Array.isArray(parsedLegacy.projects) ? parsedLegacy.projects : [],
+            skills: Array.isArray(parsedLegacy.skills) ? parsedLegacy.skills : [],
+            certifications: Array.isArray(parsedLegacy.certifications) ? parsedLegacy.certifications : [],
             uid,
             userId: uid,
             ownerId: uid,
@@ -214,10 +202,23 @@ export function loadPortfolio(uid) {
       return null;
     }
 
-    // Fallback for unauthenticated visitor previewing sample
+    // Fallback for unauthenticated visitor previewing sample or custom guest state
     const rawGuest = localStorage.getItem('foliovitae_data_guest');
     if (rawGuest) {
-      return { ...defaultPortfolioData, ...JSON.parse(rawGuest) };
+      const parsedGuest = JSON.parse(rawGuest);
+      return {
+        ...blankPortfolioData,
+        ...parsedGuest,
+        profile: {
+          ...blankPortfolioData.profile,
+          ...(parsedGuest.profile || {}),
+        },
+        education: Array.isArray(parsedGuest.education) ? parsedGuest.education : [],
+        experience: Array.isArray(parsedGuest.experience) ? parsedGuest.experience : [],
+        projects: Array.isArray(parsedGuest.projects) ? parsedGuest.projects : [],
+        skills: Array.isArray(parsedGuest.skills) ? parsedGuest.skills : [],
+        certifications: Array.isArray(parsedGuest.certifications) ? parsedGuest.certifications : [],
+      };
     }
     return defaultPortfolioData;
   } catch (err) {

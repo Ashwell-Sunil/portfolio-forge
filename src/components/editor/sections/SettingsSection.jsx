@@ -2,7 +2,14 @@ import { CloudUpload, LogOut, Link2, RotateCcw, Trash2 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { usePortfolio } from '../../../context/PortfolioContext';
 import { isFirebaseConfigured } from '../../../services/firebase';
-import { generateSlug, defaultPortfolioData } from '../../../services/storage';
+import {
+  generateSlug,
+  defaultPortfolioData,
+  blankPortfolioData,
+  savePortfolio,
+  clearPortfolio,
+} from '../../../services/storage';
+import { DEFAULT_THEME_ID } from '../../../themes/themes';
 import FormField from '../shared/FormField';
 import SectionWrapper from '../shared/SectionWrapper';
 
@@ -24,6 +31,8 @@ export default function SettingsSection({ onPublish }) {
       dispatch({ type: 'RESET', payload: sampleData });
       if (user?.uid) {
         savePortfolio(sampleData, user.uid);
+      } else {
+        savePortfolio(sampleData);
       }
     }
   };
@@ -36,14 +45,20 @@ export default function SettingsSection({ onPublish }) {
         userId: user?.uid,
         ownerId: user?.uid,
         creatorId: user?.uid,
-        themeId: portfolioData.themeId || 'sage-cream',
+        themeId: portfolioData.themeId || DEFAULT_THEME_ID,
+        layout: portfolioData.layout || 'classic',
       };
+      // Reset all portfolio sections (Profile, Education, Experience, Projects, Skills, Certifications)
       dispatch({
         type: 'RESET',
         payload: cleanData,
       });
+      // Clear persistence and save clean state to prevent repopulating on refresh
+      clearPortfolio(user?.uid);
       if (user?.uid) {
         savePortfolio(cleanData, user.uid);
+      } else {
+        savePortfolio(cleanData);
       }
     }
   };

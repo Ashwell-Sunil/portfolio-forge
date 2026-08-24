@@ -10,11 +10,17 @@ import {
   Menu,
   X,
 } from 'lucide-react';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { usePortfolio } from '../../../context/PortfolioContext';
 import { useAuth } from '../../../context/AuthContext';
 import { useAutoSave } from '../../../hooks/useAutoSave';
-import { savePortfolio, generateSlug, blankPortfolioData, defaultPortfolioData } from '../../../services/storage';
+import {
+  savePortfolio,
+  loadPortfolio,
+  generateSlug,
+  blankPortfolioData,
+  defaultPortfolioData,
+} from '../../../services/storage';
 import { isFirebaseConfigured } from '../../../services/firebase';
 import { savePortfolioToFirestore, loadPortfolioByUid } from '../../../services/firestore';
 import { getTheme, DEFAULT_THEME_ID, themeToEditorCssVars } from '../../../themes/themes';
@@ -33,7 +39,6 @@ import FolioVitaeLogo from '../../brand/Logo';
 
 export default function EditorWorkspace() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { portfolioData, dispatch } = usePortfolio();
   const [activeTab, setActiveTab] = useState('profile');
@@ -93,8 +98,21 @@ export default function EditorWorkspace() {
     async function loadWorkspaceData() {
       let foundData = null;
 
-      // 1. Fetch user's own portfolio from Firestore
-      if (isFirebaseConfigured && !user.isDemo) {
+      // 1. Check user-scoped local storage for active working draft
+      try {
+        const local = loadPortfolio(user.uid);
+        if (
+          local &&
+          (local.uid === user.uid || local.userId === user.uid || local.ownerId === user.uid)
+        ) {
+          foundData = local;
+        }
+      } catch (e) {
+        console.warn('Local workspace fetch error:', e);
+      }
+
+      // 2. If no local draft exists, fetch user's published portfolio from Firestore
+      if (!foundData && isFirebaseConfigured && !user.isDemo) {
         try {
           const remote = await loadPortfolioByUid(user.uid);
           if (
@@ -106,22 +124,6 @@ export default function EditorWorkspace() {
           }
         } catch (e) {
           console.warn('Firestore workspace fetch error:', e);
-        }
-      }
-
-      // 2. If no remote portfolio, check user-scoped local storage
-      if (!foundData) {
-        try {
-          const local = loadPortfolio(user.uid);
-          if (
-            local &&
-            (local.uid === user.uid || local.userId === user.uid || local.ownerId === user.uid) &&
-            (local.profile?.name || local.projects?.length > 0)
-          ) {
-            foundData = local;
-          }
-        } catch (e) {
-          console.warn('Local workspace fetch error:', e);
         }
       }
 
