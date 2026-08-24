@@ -1,7 +1,7 @@
 {
-  "name": "portfolioforge-backend",
+  "name": "foliovitae-backend",
   "version": "1.0.0",
-  "description": "PortfolioForge backend server",
+  "description": "Folio Vitae backend server",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

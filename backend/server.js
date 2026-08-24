@@ -61,7 +61,7 @@ app.get('/p/:slug', (req, res) => {
         </head><body>
         <div><h1 style="color:#6366f1;font-size:2rem;margin-bottom:8px">404</h1>
         <p>Portfolio <strong style="color:#e2e8f0">${req.params.slug}</strong> not found.</p>
-        <p style="margin-top:8px;font-size:.875rem">Publish it first from PortfolioForge.</p></div>
+        <p style="margin-top:8px;font-size:.875rem">Publish it first from Folio Vitae.</p></div>
         </body></html>
       `);
     }
@@ -80,7 +80,7 @@ app.get('/p/:slug', (req, res) => {
 // ── Root redirect ──────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
   res.json({
-    name: 'PortfolioForge API',
+    name: 'Folio Vitae API',
     version: '1.0.0',
     endpoints: {
       portfolios:  '/api/portfolios',
@@ -97,7 +97,7 @@ initDB();
 app.listen(PORT, '0.0.0.0', () => {
   const ip = getLocalIP();
   console.log('\n╔══════════════════════════════════════════════╗');
-  console.log('║       PortfolioForge Backend  v1.0           ║');
+  console.log('║        Folio Vitae Backend  v1.0             ║');
   console.log('╠══════════════════════════════════════════════╣');
   console.log(`║  Local:    http://localhost:${PORT}             ║`);
   console.log(`║  Network:  http://${ip}:${PORT}    ║`);

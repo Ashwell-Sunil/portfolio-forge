@@ -370,7 +370,7 @@ function renderPortfolio(data, themeId) {
       ${certsHtml}
 
       <footer>
-        <p>Built with <span class="brand">PortfolioForge</span> · <span class="slug">portfolioforge.app/${esc(slug)}</span></p>
+        <p>Built with <span class="brand">Folio Vitae</span> · <span class="slug">foliovitae.app/${esc(slug)}</span></p>
       </footer>
     </div>
   </article>
