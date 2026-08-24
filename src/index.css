@@ -1,0 +1,359 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base Resets & Fonts ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background-color: var(--pf-editor-bg, #1e1e1e);
+  color: var(--pf-text-primary, #e1e1e1);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+  overflow-y: auto;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Adobe Spectrum Scrollbars ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--pf-toolbar-bg, #1e1e1e);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--pf-border-color, #383838);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--pf-ui-accent, #1473E6);
+}
+
+.spectrum-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--pf-border-color, #383838) var(--pf-panel-bg, #252525);
+}
+.spectrum-scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.spectrum-scroll::-webkit-scrollbar-track {
+  background: var(--pf-panel-bg, #252525);
+}
+.spectrum-scroll::-webkit-scrollbar-thumb {
+  background: var(--pf-border-color, #3c3c3c);
+  border-radius: 2px;
+}
+.spectrum-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--pf-ui-accent, #1473E6);
+}
+
+/* ─── Dynamic Spectrum Design System ─── */
+.spectrum-app {
+  background-color: var(--pf-editor-bg, #1e1e1e);
+  color: var(--pf-text-primary, #e1e1e1);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.spectrum-panel {
+  background-color: var(--pf-panel-bg, #252525);
+  border: 1px solid var(--pf-border-color, #323232);
+}
+
+.spectrum-label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--pf-text-muted, #9c9c9c);
+  margin-bottom: 5px;
+}
+
+.spectrum-input, .spectrum-textarea, .spectrum-select {
+  width: 100%;
+  background-color: var(--pf-input-bg, #1b1b1b);
+  border: 1px solid var(--pf-input-border, #363636);
+  border-radius: 3px;
+  padding: 6px 9px;
+  font-size: 12px;
+  color: var(--pf-text-primary, #e1e1e1);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.spectrum-input:focus, .spectrum-textarea:focus, .spectrum-select:focus {
+  outline: none;
+  border-color: var(--pf-ui-accent, #1473E6);
+  box-shadow: 0 0 0 1px var(--pf-ui-accent, #1473E6);
+}
+
+.spectrum-input::placeholder, .spectrum-textarea::placeholder {
+  color: var(--pf-text-muted, #6e6e6e);
+  opacity: 0.7;
+}
+
+.spectrum-textarea {
+  min-height: 72px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.spectrum-select {
+  cursor: pointer;
+  appearance: auto;
+}
+
+.spectrum-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background-color: var(--pf-ui-accent, #1473E6);
+  color: var(--pf-ui-accent-text, #ffffff);
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 3px;
+  border: 1px solid var(--pf-ui-accent, #1473E6);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.spectrum-btn-primary:hover:not(:disabled) {
+  background-color: var(--pf-ui-accent-hover, #0d66d0);
+  border-color: var(--pf-ui-accent-hover, #0d66d0);
+}
+
+.spectrum-btn-primary:active:not(:disabled) {
+  background-color: var(--pf-ui-accent-active, #095aba);
+  transform: translateY(1px);
+}
+
+.spectrum-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spectrum-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background-color: var(--pf-card-bg, #2b2b2b);
+  color: var(--pf-text-primary, #d1d1d1);
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 3px;
+  border: 1px solid var(--pf-border-color, #3c3c3c);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.spectrum-btn-secondary:hover:not(:disabled) {
+  background-color: var(--pf-accordion-hover, #363636);
+  border-color: var(--pf-ui-accent, #1473E6);
+}
+
+.spectrum-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background-color: transparent;
+  color: var(--pf-text-muted, #b3b3b3);
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.spectrum-btn-ghost:hover:not(:disabled) {
+  background-color: var(--pf-accordion-hover, #2e2e2e);
+  color: var(--pf-text-primary, #ffffff);
+}
+
+.spectrum-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background-color: rgba(236, 91, 98, 0.1);
+  color: #ec5b62;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 3px;
+  border: 1px solid rgba(236, 91, 98, 0.25);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.spectrum-btn-danger:hover:not(:disabled) {
+  background-color: rgba(236, 91, 98, 0.2);
+  color: #ff787f;
+}
+
+.spectrum-card {
+  background-color: var(--pf-card-bg, #222222);
+  border: 1px solid var(--pf-border-color, #333333);
+  border-radius: 3px;
+  padding: 12px;
+}
+
+.spectrum-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  background-color: var(--pf-input-bg, #1a1a1a);
+  border: 1px solid var(--pf-border-color, #383838);
+  border-radius: 3px;
+  font-size: 11px;
+  color: var(--pf-text-primary, #d1d1d1);
+}
+
+/* ─── Backwards-Compatible Utilities ─── */
+.forge-input {
+  @apply spectrum-input;
+}
+.forge-textarea {
+  @apply spectrum-textarea;
+}
+.forge-label {
+  @apply spectrum-label;
+}
+.forge-btn-primary {
+  @apply spectrum-btn-primary;
+}
+.forge-btn-ghost {
+  @apply spectrum-btn-ghost;
+}
+.forge-btn-danger {
+  @apply spectrum-btn-danger;
+}
+.forge-card {
+  @apply spectrum-card;
+}
+.forge-tag {
+  @apply spectrum-tag;
+}
+.forge-section-title {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--pf-text-muted, #b3b3b3);
+}
+.forge-divider {
+  border-top: 1px solid var(--pf-border-color, #323232);
+  margin: 12px 0;
+}
+
+/* ─── Masonry Grid Layout ─── */
+.pf-masonry {
+  column-count: 1;
+  column-gap: 1.25rem;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .pf-masonry {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pf-masonry {
+    column-count: 2;
+  }
+}
+
+.pf-masonry-item {
+  break-inside: avoid;
+  margin-bottom: 1.25rem;
+  display: inline-block;
+  width: 100%;
+}
+
+/* ─── Terminal Scanlines (if active) ─── */
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.18) 2px,
+    rgba(0, 0, 0, 0.18) 4px
+  );
+  z-index: 2;
+}
+
+/* ─── Keyframe Animations ─── */
+@keyframes portfolioFadeSlide {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes heroReveal {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes sectionSlideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes cardPopIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-portfolio-hero {
+  animation: heroReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-portfolio-section {
+  animation: portfolioFadeSlide 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-portfolio-card {
+  animation: cardPopIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-section-heading {
+  animation: sectionSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-delay-100 { animation-delay: 0.1s; }
+.animate-delay-150 { animation-delay: 0.15s; }
+.animate-delay-200 { animation-delay: 0.2s; }
+.animate-delay-250 { animation-delay: 0.25s; }
+.animate-delay-300 { animation-delay: 0.3s; }
+.animate-delay-350 { animation-delay: 0.35s; }
+.animate-delay-400 { animation-delay: 0.4s; }
