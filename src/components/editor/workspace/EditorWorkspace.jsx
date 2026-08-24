@@ -77,7 +77,13 @@ export default function EditorWorkspace() {
     }
 
     setPublishing(true);
-    savePortfolio(portfolioData);
+    const dataToSave = {
+      ...portfolioData,
+      uid: user?.uid || portfolioData.uid,
+      ownerId: user?.uid || portfolioData.ownerId,
+      userId: user?.uid || portfolioData.userId,
+    };
+    savePortfolio(dataToSave);
 
     const slug = (portfolioData.profile?.slug || generateSlug(portfolioData.profile?.name))
       .toLowerCase()
@@ -85,7 +91,7 @@ export default function EditorWorkspace() {
 
     try {
       if (isFirebaseConfigured && user?.uid && !user.isDemo) {
-        const { username } = await savePortfolioToFirestore(user.uid, portfolioData);
+        const { username } = await savePortfolioToFirestore(user.uid, dataToSave);
         setPublishModal({
           url: `${window.location.origin}/${username}`,
           slug: username,

@@ -40,6 +40,9 @@ export async function savePortfolioToFirestore(uid, portfolioData) {
   const payload = stripUndefined({
     ...portfolioData,
     uid,
+    ownerId: uid,
+    userId: uid,
+    creatorId: uid,
     username,
     updatedAt: serverTimestamp(),
     publishedAt: serverTimestamp(),

@@ -1,9 +1,25 @@
 import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { generatePortfolioHTML } from '../../utils/generatePortfolioHTML';
+import { useAuth } from '../../context/AuthContext';
 import PortfolioForgeLogo from '../brand/Logo';
 
-export default function PortfolioViewer({ portfolioData, themeId, onBack }) {
+export default function PortfolioViewer({ portfolioData, themeId, onBack, isOwner: explicitIsOwner }) {
   const iframeRef = useRef(null);
+  const { user } = useAuth();
+
+  const isOwner = explicitIsOwner !== undefined
+    ? explicitIsOwner
+    : Boolean(
+        user?.uid &&
+        portfolioData &&
+        (
+          portfolioData.uid === user.uid ||
+          portfolioData.ownerId === user.uid ||
+          portfolioData.userId === user.uid ||
+          portfolioData.creatorId === user.uid
+        )
+      );
 
   useEffect(() => {
     if (!iframeRef.current) return;
@@ -25,11 +41,11 @@ export default function PortfolioViewer({ portfolioData, themeId, onBack }) {
           <PortfolioForgeLogo size={22} textColor="#E2E8F0" accentColor="#38BDF8" />
           <span className="text-forge-text-3 text-xs hidden sm:block">·</span>
           <span className="text-forge-text-3 text-xs hidden sm:block" style={{ color: '#94A3B8' }}>
-            {portfolioData.profile?.name || 'Portfolio'}
+            {portfolioData?.profile?.name || 'Portfolio'}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {onBack && (
+          {onBack && isOwner && (
             <button
               onClick={onBack}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-forge-text-2 border border-forge-border hover:border-forge-accent/50 hover:text-forge-accent transition-all"
@@ -37,13 +53,13 @@ export default function PortfolioViewer({ portfolioData, themeId, onBack }) {
               ← Edit Portfolio
             </button>
           )}
-          <a
-            href={window.location.pathname}
+          <Link
+            to="/dashboard"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white transition-all"
             style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}
           >
             Build Yours ✦
-          </a>
+          </Link>
         </div>
       </div>
 

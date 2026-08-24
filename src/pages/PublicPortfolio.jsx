@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Sparkles, Edit3, ArrowLeft } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import { isFirebaseConfigured } from '../services/firebase';
 import { loadPortfolioByUsername } from '../services/firestore';
 import { loadPortfolio, defaultPortfolioData, generateSlug } from '../services/storage';
@@ -9,6 +10,7 @@ import PortfolioDocument from '../components/preview/PortfolioDocument';
 
 export default function PublicPortfolio() {
   const { username } = useParams();
+  const { user } = useAuth();
   const [state, setState] = useState('loading');
   const [data, setData] = useState(null);
 
@@ -36,15 +38,6 @@ export default function PublicPortfolio() {
       const normalizedUser = String(username || '').toLowerCase().trim();
       const localSlug = (localData?.profile?.slug || generateSlug(localData?.profile?.name || '')).toLowerCase();
 
-      // If user is previewing their own active local portfolio
-      if (localData && (localSlug === normalizedUser || normalizedUser === 'preview' || normalizedUser === 'me')) {
-        if (!cancelled) {
-          setData(localData);
-          setState('done');
-        }
-        return;
-      }
-
       // If user requested the sample slug
       if (normalizedUser === 'alex-vance') {
         if (!cancelled) {
@@ -54,11 +47,20 @@ export default function PublicPortfolio() {
         return;
       }
 
-      // 2. Try Firestore with a strict 2-second timeout safeguard so it never hangs
+      // If user is previewing their own active local portfolio
+      if (localData && (normalizedUser === 'preview' || normalizedUser === 'me')) {
+        if (!cancelled) {
+          setData(localData);
+          setState('done');
+        }
+        return;
+      }
+
+      // 2. Try Firestore with timeout safeguard so it never hangs
       if (isFirebaseConfigured) {
         try {
           const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Firestore fetch timeout')), 2000)
+            setTimeout(() => reject(new Error('Firestore fetch timeout')), 2500)
           );
 
           const remote = await Promise.race([
@@ -78,26 +80,23 @@ export default function PublicPortfolio() {
         }
       }
 
-      // 3. Fallback: if remote didn't resolve, fallback gracefully to active editor data or sample
+      // 3. Fallback: if remote didn't resolve, check matching local slug or mark missing
       if (!cancelled) {
-        if (localData?.profile?.name) {
+        if (localData && localSlug === normalizedUser && localData.profile?.name) {
           setData(localData);
           setState('done');
         } else {
-          setData(defaultPortfolioData);
-          setState('done');
+          setState('missing');
         }
       }
     }
 
-    // Safety fallback: if anything stalls, force done state within 2.2 seconds
+    // Safety fallback: if anything stalls, force missing/fallback state within 3 seconds
     const safetyTimer = setTimeout(() => {
       if (!cancelled && state === 'loading') {
-        const fallback = loadPortfolio() || defaultPortfolioData;
-        setData(fallback);
-        setState('done');
+        setState('missing');
       }
-    }, 2200);
+    }, 3000);
 
     load();
 
@@ -105,10 +104,23 @@ export default function PublicPortfolio() {
       cancelled = true;
       clearTimeout(safetyTimer);
     };
-  }, [username, state]);
+  }, [username]);
 
   const activeTheme = getTheme(data?.themeId || 'sage-cream');
   const cssVars = themeToCssVars(activeTheme);
+
+  // Strict ownership check:
+  // The authenticated Firebase user ID must match the owner/creator ID of this specific portfolio
+  const isOwner = Boolean(
+    user?.uid &&
+    data &&
+    (
+      data.uid === user.uid ||
+      data.ownerId === user.uid ||
+      data.userId === user.uid ||
+      data.creatorId === user.uid
+    )
+  );
 
   if (state === 'loading') {
     return (
@@ -146,12 +158,20 @@ export default function PublicPortfolio() {
               No published developer portfolio found at <code className="text-[#447244] font-semibold">/{username}</code>.
             </p>
           </div>
-          <Link
-            to="/editor"
-            className="spectrum-btn-primary inline-flex justify-center w-full py-2.5 rounded-lg font-bold"
-          >
-            Create Your Portfolio in Editor
-          </Link>
+          <div className="flex flex-col gap-2">
+            <Link
+              to="/dashboard"
+              className="spectrum-btn-primary inline-flex justify-center w-full py-2.5 rounded-lg font-bold"
+            >
+              Create Your Portfolio
+            </Link>
+            <Link
+              to="/"
+              className="text-xs font-semibold text-[#447244] hover:underline pt-1"
+            >
+              ← Back to Home
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -166,7 +186,7 @@ export default function PublicPortfolio() {
         ...cssVars,
       }}
     >
-      {/* Pristine Public Portfolio Document */}
+      {/* Pristine Public Read-Only Portfolio Document */}
       <PortfolioDocument data={data} />
 
       {/* Floating Navigation Controls */}
@@ -186,18 +206,34 @@ export default function PublicPortfolio() {
           <span className="hidden sm:inline">Home</span>
         </Link>
 
-        <Link
-          to="/editor"
-          className="flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-bold text-white shadow-xl transition-all hover:scale-105"
-          style={{
-            background: activeTheme.colors.accent,
-            boxShadow: `0 4px 18px ${activeTheme.preview.accent}60`,
-          }}
-          title="Open Adobe Spectrum Portfolio Workspace"
-        >
-          <Edit3 size={13} />
-          <span>Editor Workspace</span>
-        </Link>
+        {/* Strictly show Edit button ONLY if currently authenticated user matches portfolio creator/owner ID */}
+        {isOwner ? (
+          <Link
+            to="/editor"
+            className="flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-bold text-white shadow-xl transition-all hover:scale-105"
+            style={{
+              background: activeTheme.colors.accent,
+              boxShadow: `0 4px 18px ${activeTheme.preview.accent}60`,
+            }}
+            title="Edit your portfolio in workspace"
+          >
+            <Edit3 size={13} />
+            <span>Edit Portfolio</span>
+          </Link>
+        ) : (
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-bold text-white shadow-xl transition-all hover:scale-105"
+            style={{
+              background: activeTheme.colors.accent,
+              boxShadow: `0 4px 18px ${activeTheme.preview.accent}60`,
+            }}
+            title="Build your own portfolio"
+          >
+            <Sparkles size={13} />
+            <span>Build Yours</span>
+          </Link>
+        )}
       </div>
     </div>
   );

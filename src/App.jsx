@@ -11,10 +11,10 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Dedicated Modern Landing Page for / */}
+          {/* Public Landing Page */}
           <Route path="/" element={<LandingPage />} />
 
-          {/* Portfolio Selector & Dashboard Flow */}
+          {/* Protected Routes (Require Firebase Authentication) */}
           <Route
             path="/dashboard"
             element={
@@ -23,8 +23,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
-          {/* Private Adobe-style Workspace (Requires Auth) */}
           <Route
             path="/editor"
             element={
@@ -34,7 +32,9 @@ export default function App() {
             }
           />
 
-          {/* Public Portfolio Route for /:username */}
+          {/* Public Portfolio Route Aliases & Direct Links */}
+          <Route path="/p/:username" element={<PublicPortfolio />} />
+          <Route path="/portfolio/:username" element={<PublicPortfolio />} />
           <Route path="/:username" element={<PublicPortfolio />} />
 
           {/* Catch-all */}
