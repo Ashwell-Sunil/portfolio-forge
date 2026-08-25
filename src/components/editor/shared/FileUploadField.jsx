@@ -126,16 +126,24 @@ export default function FileUploadField({
   };
 
   const handleFile = async (e) => {
-    const file = e.target.files?.[0];
+    if (e) {
+      e.stopPropagation?.();
+    }
+    const file = e?.target?.files?.[0];
     if (!file) return;
 
     if (file.size > 25 * 1024 * 1024) {
       setError('File is too large. Maximum size is 25MB.');
+      if (inputRef.current) inputRef.current.value = '';
       return;
     }
 
     // Intercept image file when cropping is enabled: do NOT upload immediately
-    const isImage = file.type?.startsWith('image/') || accept.includes('image');
+    const isImage =
+      file.type?.startsWith('image/') ||
+      accept.includes('image') ||
+      /\.(jpg|jpeg|png|webp|gif|svg|avif|heic|heif)$/i.test(file.name || '');
+
     if (enableCrop && isImage) {
       setError('');
       if (cropImageSrc && cropImageSrc.startsWith('blob:')) {
@@ -143,13 +151,15 @@ export default function FileUploadField({
       }
       const objectUrl = URL.createObjectURL(file);
       setCropImageSrc(objectUrl);
-      setPendingFileName(file.name);
+      setPendingFileName(file.name || 'avatar.jpg');
       setIsCropping(true);
+      if (inputRef.current) inputRef.current.value = '';
       return;
     }
 
     // Standard immediate upload for non-cropped files
     await executeUpload(file, file.name);
+    if (inputRef.current) inputRef.current.value = '';
   };
 
   const handleCropConfirm = async (croppedResult) => {
@@ -174,7 +184,8 @@ export default function FileUploadField({
     if (inputRef.current) inputRef.current.value = '';
   }, [cropImageSrc]);
 
-  const handleClear = () => {
+  const handleClear = (e) => {
+    if (e) e.stopPropagation?.();
     onChange('');
     setFileName('');
     setError('');
@@ -248,6 +259,8 @@ export default function FileUploadField({
             {enableCrop && !isPdf && value && (
               <label
                 htmlFor={`${id}-file`}
+                onClick={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
                 className="p-1 rounded text-[var(--pf-text-muted,#888)] hover:text-[var(--pf-ui-accent,#447244)] transition-colors cursor-pointer"
                 title="Crop new photo"
                 aria-label="Upload and crop replacement photo"
@@ -258,7 +271,11 @@ export default function FileUploadField({
 
             <button
               type="button"
-              onClick={handleClear}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClear(e);
+              }}
+              onTouchStart={(e) => e.stopPropagation()}
               className="p-1 rounded text-[var(--pf-text-muted,#888)] hover:text-[#ec5b62] transition-colors"
               title="Remove file"
               aria-label="Remove uploaded file"
@@ -276,6 +293,7 @@ export default function FileUploadField({
               background: 'var(--pf-card-bg, #EDF5ED)',
               border: '1px solid var(--pf-border-color, #B0C6B0)',
             }}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between text-[11px]">
               <span className="truncate" style={{ color: 'var(--pf-text-primary, #1B2A1B)' }}>
@@ -301,16 +319,19 @@ export default function FileUploadField({
         {!value && !uploading && (
           <label
             htmlFor={`${id}-file`}
-            className="flex flex-col items-center justify-center gap-1.5 w-full py-3.5 px-3 rounded cursor-pointer transition-all hover:opacity-90 shadow-sm"
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            className="flex flex-col items-center justify-center gap-1.5 w-full py-3.5 px-3 rounded cursor-pointer transition-all hover:opacity-90 shadow-sm select-none"
             style={{
               background: 'var(--pf-input-bg, #FAF7F1)',
               border: '1px dashed var(--pf-border-color, #B0C6B0)',
+              touchAction: 'manipulation',
             }}
           >
             <div style={{ color: 'var(--pf-ui-accent, #447244)' }}>
               {enableCrop ? <CropIcon /> : <UploadIcon />}
             </div>
-            <span className="text-[11px] text-center font-medium" style={{ color: 'var(--pf-text-muted, #6B7A6E)' }}>
+            <span className="text-[11px] text-center font-medium pointer-events-none" style={{ color: 'var(--pf-text-muted, #6B7A6E)' }}>
               {enableCrop ? 'Click to select & crop photo' : 'Click to upload file'}{' '}
               <span>({accept.includes('pdf') ? 'PDF or Image' : 'PNG, JPG, WebP, SVG'})</span>
             </span>
@@ -319,7 +340,15 @@ export default function FileUploadField({
               id={`${id}-file`}
               type="file"
               accept={accept}
-              onChange={handleFile}
+              onClick={(e) => {
+                e.stopPropagation();
+                // Reset value to ensure onChange triggers even if selecting the same file again on mobile
+                e.target.value = '';
+              }}
+              onChange={(e) => {
+                e.stopPropagation();
+                handleFile(e);
+              }}
               className="sr-only"
               aria-label={`Upload ${label}`}
             />

@@ -410,11 +410,19 @@ export default function EditorWorkspace() {
 
       {/* ── Mobile Slide-Over Drawer (Properties & Navigation) ── */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-50 flex">
+        <div
+          className="md:hidden fixed inset-0 z-50 flex"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Editor properties drawer"
+        >
           {/* Backdrop */}
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setMobileMenuOpen(false);
+            }}
           />
 
           {/* Drawer Panel */}
@@ -424,6 +432,8 @@ export default function EditorWorkspace() {
               background: 'var(--pf-panel-bg, #E4ECE4)',
               borderRight: '1px solid var(--pf-border-color, #D8CEBE)',
             }}
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
           >
             {/* Drawer Header */}
             <div
