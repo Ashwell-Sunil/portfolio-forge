@@ -300,3 +300,27 @@ export async function loadPortfolioByUsername(username) {
     return null;
   }
 }
+
+/**
+ * Directly updates the profile imageUrl on the user's Firestore portfolio document.
+ */
+export async function updateProfileAvatarInFirestore(uid, imageUrl) {
+  if (!isFirebaseConfigured || !db || !uid || uid === 'demo-local-user') return;
+
+  try {
+    const portfolioDocRef = doc(db, 'portfolios', uid);
+    await setDoc(
+      portfolioDocRef,
+      {
+        profile: {
+          imageUrl,
+        },
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  } catch (err) {
+    console.warn('Could not update avatar in Firestore doc:', err);
+  }
+}
+

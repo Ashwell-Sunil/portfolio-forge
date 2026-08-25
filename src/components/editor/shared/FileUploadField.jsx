@@ -1,6 +1,8 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { uploadPortfolioFile } from '../../../services/cloudStorage';
+import { updateProfileAvatarInFirestore } from '../../../services/firestore';
+import ImageCropModal from './ImageCropModal';
 
 const UploadIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -33,9 +35,16 @@ const ImageIcon = () => (
   </svg>
 );
 
+const CropIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 2v14a2 2 0 0 0 2 2h14"/>
+    <path d="M18 22V8a2 2 0 0 0-2-2H2"/>
+  </svg>
+);
+
 /**
  * Adobe Spectrum-styled direct local file upload field.
- * Pure file dropzone + dynamic progress tracking + preview card.
+ * Pure file dropzone + dynamic progress tracking + preview card + optional 1:1 image cropper.
  */
 export default function FileUploadField({
   id,
@@ -46,6 +55,10 @@ export default function FileUploadField({
   hint,
   previewType = 'image',
   folder = 'uploads',
+  enableCrop = false,
+  cropAspect = 1,
+  cropShape = 'round',
+  onUploadSuccess,
 }) {
   const { user } = useAuth();
   const inputRef = useRef(null);
@@ -55,34 +68,52 @@ export default function FileUploadField({
   const [fileName, setFileName] = useState('');
   const [imgLoadFailed, setImgLoadFailed] = useState(false);
 
+  // Cropping State
+  const [isCropping, setIsCropping] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState(null);
+  const [pendingFileName, setPendingFileName] = useState('avatar.jpg');
+
   useEffect(() => {
     setImgLoadFailed(false);
   }, [value]);
 
-  const handleFile = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Clean up object URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      if (cropImageSrc && cropImageSrc.startsWith('blob:')) {
+        URL.revokeObjectURL(cropImageSrc);
+      }
+    };
+  }, [cropImageSrc]);
 
-    if (file.size > 25 * 1024 * 1024) {
-      setError('File is too large. Maximum size is 25MB.');
-      return;
-    }
-
+  const executeUpload = async (fileToUpload, originalName) => {
     setError('');
     setImgLoadFailed(false);
     setUploading(true);
     setProgress(5);
-    setFileName(file.name);
+    const targetName = originalName || fileToUpload.name || `${folder}-item-${Date.now()}`;
+    setFileName(targetName);
 
     try {
       const resultUrl = await uploadPortfolioFile(
-        file,
+        fileToUpload,
         user?.uid || 'user-session',
         folder,
         (pct) => setProgress(pct)
       );
 
+      // 1. Update React state via onChange
       onChange(resultUrl);
+
+      // 2. If this is an avatar or profile image and the user is authenticated, update the Firestore doc
+      if (user?.uid && (folder === 'avatars' || id === 'profile-image')) {
+        await updateProfileAvatarInFirestore(user.uid, resultUrl);
+      }
+
+      if (onUploadSuccess) {
+        onUploadSuccess(resultUrl);
+      }
+
       setProgress(100);
     } catch (err) {
       console.error('Upload processing error:', err);
@@ -93,6 +124,55 @@ export default function FileUploadField({
       }, 250);
     }
   };
+
+  const handleFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 25 * 1024 * 1024) {
+      setError('File is too large. Maximum size is 25MB.');
+      return;
+    }
+
+    // Intercept image file when cropping is enabled: do NOT upload immediately
+    const isImage = file.type?.startsWith('image/') || accept.includes('image');
+    if (enableCrop && isImage) {
+      setError('');
+      if (cropImageSrc && cropImageSrc.startsWith('blob:')) {
+        URL.revokeObjectURL(cropImageSrc);
+      }
+      const objectUrl = URL.createObjectURL(file);
+      setCropImageSrc(objectUrl);
+      setPendingFileName(file.name);
+      setIsCropping(true);
+      return;
+    }
+
+    // Standard immediate upload for non-cropped files
+    await executeUpload(file, file.name);
+  };
+
+  const handleCropConfirm = async (croppedResult) => {
+    // croppedResult contains { file, blob, dataUrl }
+    setIsCropping(false);
+    if (cropImageSrc && cropImageSrc.startsWith('blob:')) {
+      URL.revokeObjectURL(cropImageSrc);
+      setCropImageSrc(null);
+    }
+    if (inputRef.current) inputRef.current.value = '';
+
+    // Upload the newly cropped image to Firebase Storage
+    await executeUpload(croppedResult.file, pendingFileName);
+  };
+
+  const handleCropCancel = useCallback(() => {
+    setIsCropping(false);
+    if (cropImageSrc && cropImageSrc.startsWith('blob:')) {
+      URL.revokeObjectURL(cropImageSrc);
+      setCropImageSrc(null);
+    }
+    if (inputRef.current) inputRef.current.value = '';
+  }, [cropImageSrc]);
 
   const handleClear = () => {
     onChange('');
@@ -164,6 +244,18 @@ export default function FileUploadField({
               </p>
             </div>
 
+            {/* Re-crop trigger button if image and enableCrop is on */}
+            {enableCrop && !isPdf && value && (
+              <label
+                htmlFor={`${id}-file`}
+                className="p-1 rounded text-[var(--pf-text-muted,#888)] hover:text-[var(--pf-ui-accent,#447244)] transition-colors cursor-pointer"
+                title="Crop new photo"
+                aria-label="Upload and crop replacement photo"
+              >
+                <CropIcon />
+              </label>
+            )}
+
             <button
               type="button"
               onClick={handleClear}
@@ -216,10 +308,11 @@ export default function FileUploadField({
             }}
           >
             <div style={{ color: 'var(--pf-ui-accent, #447244)' }}>
-              <UploadIcon />
+              {enableCrop ? <CropIcon /> : <UploadIcon />}
             </div>
             <span className="text-[11px] text-center font-medium" style={{ color: 'var(--pf-text-muted, #6B7A6E)' }}>
-              Click to upload file <span>({accept.includes('pdf') ? 'PDF or Image' : 'PNG, JPG, WebP, SVG'})</span>
+              {enableCrop ? 'Click to select & crop photo' : 'Click to upload file'}{' '}
+              <span>({accept.includes('pdf') ? 'PDF or Image' : 'PNG, JPG, WebP, SVG'})</span>
             </span>
             <input
               ref={inputRef}
@@ -236,6 +329,18 @@ export default function FileUploadField({
 
       {error && <p className="text-[11px] text-[#ec5b62]">⚠ {error}</p>}
       {hint && !error && <p className="text-[10.5px]" style={{ color: 'var(--pf-text-muted, #6B7A6E)' }}>{hint}</p>}
+
+      {/* 1:1 Aspect Ratio Cropping Modal */}
+      {isCropping && cropImageSrc && (
+        <ImageCropModal
+          imageSrc={cropImageSrc}
+          fileName={pendingFileName}
+          aspect={cropAspect}
+          cropShape={cropShape}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   );
 }

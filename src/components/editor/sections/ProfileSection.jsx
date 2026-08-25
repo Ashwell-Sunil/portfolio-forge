@@ -68,16 +68,19 @@ export default function ProfileSection() {
         <div className="forge-divider" />
         <p className="forge-section-title">Media & Documents</p>
 
-        {/* Profile Image File Upload */}
+        {/* Profile Image File Upload with 1:1 Aspect Ratio Cropping */}
         <FileUploadField
           id="profile-image"
           label="Profile Photo"
           value={profile.imageUrl}
           onChange={update('imageUrl')}
           accept="image/*"
-          hint="Upload photo from your device"
+          hint="Upload and crop your profile avatar (1:1 square ratio)"
           previewType="image"
           folder="avatars"
+          enableCrop={true}
+          cropAspect={1}
+          cropShape="round"
         />
 
         {/* Profile Picture Appearance Controls (Size & Position) */}
