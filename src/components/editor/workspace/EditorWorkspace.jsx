@@ -165,34 +165,66 @@ export default function EditorWorkspace() {
 
     setPublishing(true);
     const targetUid = user?.uid || portfolioData.uid || portfolioData.userId;
+    const rawSlug = portfolioData.profile?.slug || generateSlug(portfolioData.profile?.name);
+    const initialSlug = normalizeSlug(rawSlug);
+
     const dataToSave = {
       ...portfolioData,
+      profile: {
+        ...(portfolioData.profile || {}),
+        slug: initialSlug,
+      },
       uid: targetUid,
       ownerId: targetUid,
       userId: targetUid,
       creatorId: targetUid,
+      slug: initialSlug,
+      username: initialSlug,
     };
-    savePortfolio(dataToSave, targetUid);
-
-    const rawSlug = portfolioData.profile?.slug || generateSlug(portfolioData.profile?.name);
-    const slug = normalizeSlug(rawSlug);
 
     try {
       if (isFirebaseConfigured && targetUid && !user?.isDemo) {
-        const { username } = await savePortfolioToFirestore(targetUid, dataToSave);
+        const { username: finalSlug, isAutoResolved } = await savePortfolioToFirestore(targetUid, dataToSave);
+
+        // Update local storage and context state with the final auto-generated unique slug
+        const updatedData = {
+          ...dataToSave,
+          profile: {
+            ...dataToSave.profile,
+            slug: finalSlug,
+          },
+          slug: finalSlug,
+          username: finalSlug,
+        };
+        savePortfolio(updatedData, targetUid);
+
+        // Synchronize editor state so inputs, badges, and preview links immediately reflect the final slug
+        dispatch({
+          type: 'UPDATE_PROFILE',
+          payload: { slug: finalSlug },
+        });
+
         setPublishModal({
-          url: `${window.location.origin}/${username}`,
-          slug: username,
+          url: `${window.location.origin}/${finalSlug}`,
+          slug: finalSlug,
           isFirebase: true,
+          isAutoResolved,
         });
-        showToast(`Published successfully to /${username}`);
+
+        if (isAutoResolved) {
+          showToast(`Slug was in use. Assigned unique link /${finalSlug}`, 'info');
+        } else {
+          showToast(`Published successfully to /${finalSlug}`);
+        }
       } else {
+        savePortfolio(dataToSave, targetUid);
         setPublishModal({
-          url: `${window.location.origin}/${slug}`,
-          slug,
+          url: `${window.location.origin}/${initialSlug}`,
+          slug: initialSlug,
           isFirebase: false,
+          isAutoResolved: false,
         });
-        showToast(`Portfolio saved! Live at /${slug}`);
+        showToast(`Portfolio saved! Live at /${initialSlug}`);
       }
     } catch (err) {
       console.error('Publish error:', err);
@@ -200,7 +232,7 @@ export default function EditorWorkspace() {
     } finally {
       setPublishing(false);
     }
-  }, [portfolioData, showToast, user]);
+  }, [portfolioData, showToast, user, dispatch]);
 
   const slug = normalizeSlug(portfolioData.profile?.slug || generateSlug(portfolioData.profile?.name));
 
@@ -527,7 +559,9 @@ export default function EditorWorkspace() {
             </div>
 
             <p className="text-[13px] mt-2 leading-relaxed" style={{ color: 'var(--pf-text-muted, #6B7A6E)' }}>
-              {publishModal.isFirebase
+              {publishModal.isAutoResolved
+                ? 'Your chosen handle was already in use by another user. We automatically assigned a unique link to your portfolio.'
+                : publishModal.isFirebase
                 ? 'Your portfolio is synchronized to Google Firestore and live for the world.'
                 : 'Your portfolio is saved and ready for public sharing.'}
             </p>

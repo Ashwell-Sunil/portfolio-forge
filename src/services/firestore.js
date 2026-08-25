@@ -31,6 +31,98 @@ function stripUndefined(value) {
   return value;
 }
 
+export async function isSlugAvailable(candidateSlug, currentUid) {
+  assertDb();
+  const normalized = normalizeSlug(candidateSlug);
+  if (!normalized) return false;
+
+  // Reserved demo keywords shouldn't collide with user custom slugs
+  if (['demo', 'sample', 'sample-portfolio', 'view-demo', 'preview', 'me'].includes(normalized)) {
+    return false;
+  }
+
+  // 1. Check usernames alias collection
+  try {
+    const aliasSnap = await getDoc(doc(db, 'usernames', normalized));
+    if (aliasSnap.exists()) {
+      const data = aliasSnap.data();
+      const ownerId = data.uid || data.userId || data.ownerId;
+      if (ownerId && ownerId !== currentUid) {
+        return false;
+      }
+    }
+  } catch (e) {
+    console.warn('Error checking usernames alias availability:', e);
+  }
+
+  // 2. Check portfolios collection by slug
+  try {
+    const qSlug = query(collection(db, 'portfolios'), where('slug', '==', normalized), limit(5));
+    const slugSnap = await getDocs(qSlug);
+    for (const d of slugSnap.docs) {
+      const data = d.data();
+      const ownerId = data.uid || data.userId || data.ownerId || d.id;
+      if (d.id !== currentUid && ownerId !== currentUid) {
+        return false;
+      }
+    }
+  } catch (e) {
+    console.warn('Error checking portfolios by slug availability:', e);
+  }
+
+  // 3. Check portfolios collection by username field
+  try {
+    const qUsername = query(collection(db, 'portfolios'), where('username', '==', normalized), limit(5));
+    const usernameSnap = await getDocs(qUsername);
+    for (const d of usernameSnap.docs) {
+      const data = d.data();
+      const ownerId = data.uid || data.userId || data.ownerId || d.id;
+      if (d.id !== currentUid && ownerId !== currentUid) {
+        return false;
+      }
+    }
+  } catch (e) {
+    console.warn('Error checking portfolios by username availability:', e);
+  }
+
+  // 4. Check direct document ID collision in portfolios
+  try {
+    const directSnap = await getDoc(doc(db, 'portfolios', normalized));
+    if (directSnap.exists() && directSnap.id !== currentUid) {
+      const data = directSnap.data();
+      const ownerId = data.uid || data.userId || data.ownerId || directSnap.id;
+      if (ownerId !== currentUid) {
+        return false;
+      }
+    }
+  } catch (e) {
+    console.warn('Error checking direct portfolio doc availability:', e);
+  }
+
+  return true;
+}
+
+export async function resolveUniqueSlug(desiredSlug, currentUid) {
+  const baseSlug = normalizeSlug(desiredSlug) || 'portfolio';
+
+  // If the base slug is available (or belongs to this user), use it
+  if (await isSlugAvailable(baseSlug, currentUid)) {
+    return baseSlug;
+  }
+
+  // Otherwise, automatically resolve collision by appending a short random alphanumeric string (e.g. -a4b9)
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const suffix = Math.random().toString(36).substring(2, 6);
+    const candidate = `${baseSlug}-${suffix}`;
+    if (await isSlugAvailable(candidate, currentUid)) {
+      return candidate;
+    }
+  }
+
+  // Fallback: append timestamp-based unique suffix
+  return `${baseSlug}-${Date.now().toString(36).slice(-4)}`;
+}
+
 export async function savePortfolioToFirestore(uid, portfolioData) {
   assertDb();
   if (!uid) {
@@ -43,20 +135,23 @@ export async function savePortfolioToFirestore(uid, portfolioData) {
     portfolioData.username ||
     generateSlug(portfolioData.profile?.name) ||
     uid;
-  const slug = normalizeSlug(rawSlug) || uid;
+  const initialSlug = normalizeSlug(rawSlug) || uid;
+
+  // Silently check if taken and auto-resolve to a unique slug if needed
+  const finalSlug = await resolveUniqueSlug(initialSlug, uid);
 
   const payload = stripUndefined({
     ...portfolioData,
     profile: {
       ...(portfolioData.profile || {}),
-      slug,
+      slug: finalSlug,
     },
     uid,
     ownerId: uid,
     userId: uid,
     creatorId: uid,
-    slug,
-    username: slug,
+    slug: finalSlug,
+    username: finalSlug,
     updatedAt: serverTimestamp(),
     publishedAt: serverTimestamp(),
   });
@@ -65,16 +160,16 @@ export async function savePortfolioToFirestore(uid, portfolioData) {
   await setDoc(doc(db, 'portfolios', uid), payload, { merge: true });
 
   // Save slug alias pointing to this user
-  await setDoc(doc(db, 'usernames', slug), {
+  await setDoc(doc(db, 'usernames', finalSlug), {
     uid,
     userId: uid,
     ownerId: uid,
-    slug,
-    username: slug,
+    slug: finalSlug,
+    username: finalSlug,
     updatedAt: serverTimestamp(),
   }, { merge: true });
 
-  return { uid, username: slug, slug };
+  return { uid, username: finalSlug, slug: finalSlug, isAutoResolved: finalSlug !== initialSlug };
 }
 
 export async function loadPortfolioByUid(uid) {
