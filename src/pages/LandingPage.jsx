@@ -8,364 +8,315 @@ import {
   Layers,
   CloudUpload,
   ExternalLink,
+  Cpu,
+  Zap,
+  Globe,
 } from 'lucide-react';
 import { THEMES } from '../themes/themes';
 import FolioVitaeLogo from '../components/brand/Logo';
-import Hero3D from '../components/Hero3D';
+import HeroCinematic from '../components/HeroCinematic';
+import ProjectParallax from '../components/ProjectParallax';
+import TiltCard from '../components/ui/TiltCard';
+import Spotlight from '../components/ui/Spotlight';
+import { defaultPortfolioData } from '../services/storage';
 
 export default function LandingPage() {
-  const [activeThemeId, setActiveThemeId] = useState('sage-cream');
+  const [activeThemeId, setActiveThemeId] = useState('dark-obsidian');
   const activeTheme = THEMES.find((t) => t.id === activeThemeId) || THEMES[0];
+  const accentColor = activeTheme?.colors?.accent || '#6366f1';
+
+  // Sample featured projects for the live landing showcase
+  const showcaseProjects = defaultPortfolioData.projects || [
+    {
+      id: 'proj-1',
+      title: 'NeuralTrace AI Observability',
+      description: 'Distributed trace visualization and LLM latency diagnostics engine with sub-millisecond metrics processing.',
+      techStack: ['React', 'Three.js', 'Go', 'TailwindCSS'],
+      featured: true,
+      imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
+      link: 'https://github.com',
+    },
+    {
+      id: 'proj-2',
+      title: 'Quantum Ledger Protocol',
+      description: 'Decentralized consensus framework featuring zero-knowledge proof verification and cryptographic auditing.',
+      techStack: ['Rust', 'TypeScript', 'WASM', 'PostgreSQL'],
+      featured: true,
+      imageUrl: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=800&q=80',
+      link: 'https://github.com',
+    },
+    {
+      id: 'proj-3',
+      title: 'Vortex Real-time Mesh Router',
+      description: 'High-concurrency WebSocket clustering architecture handling 500k active duplex connections.',
+      techStack: ['Node.js', 'Redis', 'Docker', 'React 19'],
+      featured: true,
+      imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80',
+      link: 'https://github.com',
+    },
+  ];
 
   return (
-    <div
-      className="min-h-screen relative flex flex-col font-sans transition-colors duration-500 overflow-x-hidden"
-      style={{
-        backgroundColor: activeTheme.colors.pageBg,
-        color: activeTheme.colors.text,
-      }}
-    >
-      {/* ── Background Ambient Light Orbs ── */}
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] rounded-full pointer-events-none blur-3xl opacity-30 transition-all duration-500"
-        style={{
-          background: `radial-gradient(circle, ${activeTheme.preview.accent} 0%, transparent 70%)`,
-        }}
-      />
-
-      {/* ── Top Navigation Bar ── */}
-      <nav
-        className="border-b sticky top-0 z-40 backdrop-blur-md transition-colors duration-300"
-        style={{
-          borderColor: activeTheme.colors.border,
-          backgroundColor: `${activeTheme.colors.pageBg}CC`,
-        }}
-      >
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="group" title="Folio Vitae">
+    <div className="min-h-screen relative flex flex-col font-sans bg-[#05070E] text-slate-100 overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
+      {/* ── Fixed Top Navigation Bar with Glassmorphism ── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-2xl bg-slate-950/70 border-b border-white/[0.08] transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between">
+          {/* Brand Logo */}
+          <Link to="/" className="group flex items-center gap-2.5" title="Folio Vitae">
             <FolioVitaeLogo
               size={34}
-              subtitle="Workspace"
-              textColor={activeTheme.colors.text}
-              accentColor={activeTheme.colors.accent}
-              iconClassName="group-hover:scale-105"
+              subtitle="Cinematic Studio"
+              textColor="#ffffff"
+              accentColor="#38bdf8"
+              iconClassName="group-hover:scale-105 transition-transform duration-300"
             />
           </Link>
 
-          {/* Header Actions */}
+          {/* Nav Actions */}
           <div className="flex items-center gap-3">
             <Link
               to="/demo"
               target="_blank"
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all hover:scale-105"
-              style={{
-                background: activeTheme.colors.surface,
-                borderColor: activeTheme.colors.border,
-                color: activeTheme.colors.text,
-              }}
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full border border-white/10 bg-white/[0.04] text-slate-200 hover:bg-white/[0.08] hover:border-white/20 transition-all hover:scale-105"
             >
-              <span>Explore Sample</span>
-              <ExternalLink size={12} />
+              <span>Explore Demo</span>
+              <ExternalLink size={12} className="text-cyan-400" />
             </Link>
+
             <Link
               to="/dashboard"
-              className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-full text-white shadow-md transition-all hover:scale-105"
+              className="inline-flex items-center gap-2 text-xs font-bold px-5 py-2.5 rounded-full text-white shadow-lg transition-all hover:scale-105 active:scale-95"
               style={{
-                background: activeTheme.colors.accent,
-                boxShadow: `0 4px 14px ${activeTheme.preview.accent}40`,
+                background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+                boxShadow: '0 0 25px rgba(99, 102, 241, 0.45)',
               }}
             >
-              <span>Launch Workspace</span>
+              <span>Launch Studio</span>
               <ArrowRight size={14} />
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* ── Main Hero Section ── */}
-      <section className="relative pt-12 pb-14 px-6 max-w-4xl mx-auto text-center z-10">
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold mb-4 border shadow-sm transition-all"
-          style={{
-            background: activeTheme.colors.tag.bg,
-            color: activeTheme.colors.tag.text,
-            borderColor: activeTheme.colors.tag.border,
-          }}
-        >
-          <Sparkles size={13} />
-          <span>10+ Curated Aesthetic Themes & Multiple Layouts</span>
-        </motion.div>
+      {/* ── 1. Massive Cinematic Screen-Filling Hero Section ── */}
+      <HeroCinematic
+        title="Build Your Cinematic Developer Portfolio in Minutes"
+        highlightWords={['Cinematic', 'Developer', 'Portfolio', 'Minutes']}
+        subtitle="Transform your engineering trajectory with 3D physics tilt grids, high-performance Lenis inertia scrolling, and ethereal glassmorphism styling."
+        accentColor="#6366f1"
+        primaryCtaText="Launch Studio Workspace"
+        primaryCtaLink="/dashboard"
+        secondaryCtaText="View Demo Portfolio"
+        secondaryCtaLink="/demo"
+      />
 
-        {/* 3D Hero Canvas */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.88 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-md mx-auto -my-2 sm:-my-4"
-        >
-          <Hero3D accentColor={activeTheme.colors.accent} />
-        </motion.div>
+      {/* ── 2. 3D Parallax Project Showcase Section ── */}
+      <ProjectParallax
+        projects={showcaseProjects}
+        accentColor="#6366f1"
+        title="Interactive 3D Project Physics"
+        subtitle="Hover over the project cards to experience multi-axis 3D tilt physics, real-time light glare tracking, and smooth responsive parallax depth."
+      />
 
-        {/* Hero Title */}
-        <motion.h1
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="font-extrabold tracking-tight leading-[1.15] mb-5 text-4xl sm:text-5xl md:text-6xl"
-          style={{
-            color: activeTheme.colors.text,
-            fontFamily: "'Space Grotesk', system-ui, sans-serif",
-          }}
-        >
-          Build Your Developer Portfolio in{' '}
-          <span style={{ color: activeTheme.colors.accent }}>Minutes</span>
-        </motion.h1>
+      {/* ── 3. Ultra-Premium Architectural Feature Pillars (3D Tilt Cards) ── */}
+      <section className="relative py-20 sm:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto z-20">
+        <Spotlight className="top-1/3 left-1/4" fill="#3b82f6" opacity={0.18} />
 
-        {/* Concise Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="text-base sm:text-lg max-w-2xl mx-auto mb-8 leading-relaxed font-normal"
-          style={{ color: activeTheme.colors.text2 }}
-        >
-          A precision workspace crafted for engineers. Customize aesthetic pastel themes with organic watermarks,
-          switch between Classic, Minimal, and Bento layouts, and publish live in seconds.
-        </motion.p>
-
-        {/* Hero Action Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-10"
-        >
-          <Link
-            to="/dashboard"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-full text-sm font-bold text-white shadow-xl transition-all hover:scale-105 active:scale-95"
-            style={{
-              background: activeTheme.colors.accent,
-              boxShadow: `0 8px 24px ${activeTheme.preview.accent}50`,
-            }}
-          >
-            <span>Create Your Portfolio</span>
-            <ArrowRight size={16} />
-          </Link>
-
-          <Link
-            to="/demo"
-            target="_blank"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-sm font-bold border transition-all hover:scale-105"
-            style={{
-              background: activeTheme.colors.cardBg,
-              borderColor: activeTheme.colors.border,
-              color: activeTheme.colors.text,
-              boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
-            }}
-          >
-            <ExternalLink size={15} />
-            <span>View Demo Portfolio</span>
-          </Link>
-        </motion.div>
-
-        {/* Curated Theme Quick Switcher */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="pt-2"
-        >
-          <p
-            className="text-xs font-bold uppercase tracking-widest mb-3 opacity-75"
-            style={{ color: activeTheme.colors.text3 }}
-          >
-            Explore Curated Palettes:
-          </p>
-          <div
-            className="inline-flex flex-wrap items-center justify-center gap-1.5 p-1.5 rounded-full border shadow-sm"
-            style={{
-              background: activeTheme.colors.cardBg,
-              borderColor: activeTheme.colors.border,
-            }}
-          >
-            {THEMES.slice(0, 5).map((theme) => {
-              const isSelected = activeThemeId === theme.id;
-              return (
-                <button
-                  key={theme.id}
-                  type="button"
-                  onClick={() => setActiveThemeId(theme.id)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:scale-105"
-                  style={{
-                    background: isSelected ? theme.colors.accent : 'transparent',
-                    color: isSelected ? '#ffffff' : activeTheme.colors.text,
-                  }}
-                >
-                  <span
-                    className="w-3 h-3 rounded-full border"
-                    style={{ background: theme.preview.accent, borderColor: theme.preview.border }}
-                  />
-                  <span>{theme.name}</span>
-                </button>
-              );
-            })}
-            <Link
-              to="/dashboard"
-              className="text-xs font-bold px-3 py-1.5 opacity-80 hover:opacity-100 transition-opacity"
-              style={{ color: activeTheme.colors.accent }}
-            >
-              +5 More in Editor →
-            </Link>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* ── Three Core Pillars Section ── */}
-      <section className="py-12 px-6 max-w-5xl mx-auto z-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Pillar 1: Dynamic Theme Engine */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0 }}
-            className="p-6 rounded-2xl border transition-all hover:translate-y-[-4px]"
-            style={{
-              background: activeTheme.colors.cardBg,
-              borderColor: activeTheme.colors.cardBorder,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
-            }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 border border-white/10 bg-white/[0.04] backdrop-blur-md text-cyan-300"
           >
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-white shadow-sm"
-              style={{ background: activeTheme.colors.accent }}
-            >
-              <Palette size={20} />
-            </div>
-            <h3 className="text-base font-bold mb-2">Dynamic Theme Engine</h3>
-            <p className="text-xs leading-relaxed" style={{ color: activeTheme.colors.text2 }}>
-              Switch between 10 curated pastel palettes with organic watermarks, soft cards, and eye-friendly low-contrast surfaces.
-            </p>
+            <Zap size={13} />
+            <span>Architecture & Engine</span>
           </motion.div>
 
-          {/* Pillar 2: Flexible Editor Panel */}
+          <motion.h2
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-4"
+            style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
+          >
+            Engineered for Precision & Impact
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-sm sm:text-base text-slate-400 leading-relaxed font-normal"
+          >
+            Every micro-interaction is tuned for maximum fidelity, responsiveness, and aesthetic excellence.
+          </motion.p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          {/* Pillar 1: Dynamic 3D Mesh Engine */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-            className="p-6 rounded-2xl border transition-all hover:translate-y-[-4px]"
-            style={{
-              background: activeTheme.colors.cardBg,
-              borderColor: activeTheme.colors.cardBorder,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
-            }}
+            transition={{ duration: 0.6, delay: 0 }}
+            className="h-full"
           >
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-white shadow-sm"
-              style={{ background: activeTheme.colors.accent }}
+            <TiltCard
+              tiltIntensity={14}
+              glowColor="#6366f1"
+              className="h-full p-8 flex flex-col justify-between bg-slate-950/60 border border-slate-800/80"
             >
-              <Layers size={20} />
-            </div>
-            <h3 className="text-base font-bold mb-2">Flexible Editor & Layouts</h3>
-            <p className="text-xs leading-relaxed" style={{ color: activeTheme.colors.text2 }}>
-              Choose between Classic Split, Minimal Centered, and Bento Grid layouts with real-time synchronized canvas previews.
-            </p>
+              <div>
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30">
+                  <Palette size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
+                  Dynamic 3D Aesthetics
+                </h3>
+                <p className="text-sm text-slate-300/80 leading-relaxed mb-6">
+                  Switch dynamically between curated obsidian, cyberpunk, and cosmic themes with synchronized ambient lighting and metallic canvas reflections.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-white/[0.06] flex items-center gap-2 text-xs font-semibold text-indigo-400">
+                <span>Real-time Material Sync</span>
+                <span>→</span>
+              </div>
+            </TiltCard>
           </motion.div>
 
-          {/* Pillar 3: Firestore Cloud Storage */}
+          {/* Pillar 2: 3D Parallax Layout Engine */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-            className="p-6 rounded-2xl border transition-all hover:translate-y-[-4px]"
-            style={{
-              background: activeTheme.colors.cardBg,
-              borderColor: activeTheme.colors.cardBorder,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
-            }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="h-full"
           >
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-white shadow-sm"
-              style={{ background: activeTheme.colors.accent }}
+            <TiltCard
+              tiltIntensity={14}
+              glowColor="#06b6d4"
+              className="h-full p-8 flex flex-col justify-between bg-slate-950/60 border border-slate-800/80"
             >
-              <CloudUpload size={20} />
-            </div>
-            <h3 className="text-base font-bold mb-2">Firestore Cloud Storage</h3>
-            <p className="text-xs leading-relaxed" style={{ color: activeTheme.colors.text2 }}>
-              Securely manage multiple portfolios, upload project screenshots and resume documents, and publish live with one click.
-            </p>
+              <div>
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30">
+                  <Layers size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
+                  ProjectParallax & Glass Grid
+                </h3>
+                <p className="text-sm text-slate-300/80 leading-relaxed mb-6">
+                  Replace outdated flat grids with multi-dimensional glass cards that react to user mouse velocity with physics-based spring smoothing.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-white/[0.06] flex items-center gap-2 text-xs font-semibold text-cyan-400">
+                <span>Framer Motion Springs</span>
+                <span>→</span>
+              </div>
+            </TiltCard>
+          </motion.div>
+
+          {/* Pillar 3: Zero-Latency Cloud Storage */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="h-full"
+          >
+            <TiltCard
+              tiltIntensity={14}
+              glowColor="#10b981"
+              className="h-full p-8 flex flex-col justify-between bg-slate-950/60 border border-slate-800/80"
+            >
+              <div>
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30">
+                  <CloudUpload size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
+                  Zero-Friction Cloud Sync
+                </h3>
+                <p className="text-sm text-slate-300/80 leading-relaxed mb-6">
+                  Manage multiple portfolios with Google Authentication, upload project artifacts, and broadcast live globally with instant edge caching.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-white/[0.06] flex items-center gap-2 text-xs font-semibold text-emerald-400">
+                <span>Firestore & Edge CDN</span>
+                <span>→</span>
+              </div>
+            </TiltCard>
           </motion.div>
         </div>
       </section>
 
-      {/* ── Bottom CTA Banner ── */}
-      <section className="py-12 px-6 max-w-4xl mx-auto text-center z-10">
+      {/* ── 4. Bottom Cinematic Radiant CTA Banner ── */}
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto z-20 text-center w-full">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="p-10 rounded-3xl border shadow-xl relative overflow-hidden"
-          style={{
-            background: activeTheme.colors.surface,
-            borderColor: activeTheme.colors.border,
-          }}
+          initial={{ opacity: 0, y: 40, scale: 0.96 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="relative p-10 sm:p-16 rounded-3xl border border-white/15 bg-gradient-to-b from-slate-900/90 via-slate-950/90 to-slate-950/95 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden"
         >
+          {/* Ambient Inner Spotlight */}
+          <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-gradient-to-br from-cyan-500/20 via-indigo-500/20 to-purple-500/20 blur-3xl opacity-70" />
+
           <h2
-            className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-3"
-            style={{ color: activeTheme.colors.text }}
+            className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-4 leading-tight relative z-10"
+            style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
           >
-            Ready to Build Your Engineering Portfolio?
+            Ready to Build Your{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400">
+              Cinematic Portfolio?
+            </span>
           </h2>
-          <p className="text-xs sm:text-sm max-w-lg mx-auto mb-7" style={{ color: activeTheme.colors.text2 }}>
-            Start immediately in the live editor or connect Google authentication for cloud sync.
+
+          <p className="text-sm sm:text-base text-slate-300/80 max-w-xl mx-auto mb-10 leading-relaxed relative z-10">
+            Start customizing your project parallax layout immediately in the visual editor or connect your authentication for automatic cloud synchronization.
           </p>
-          <Link
-            to="/dashboard"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-sm font-bold text-white shadow-lg transition-all hover:scale-105"
-            style={{
-              background: activeTheme.colors.accent,
-              boxShadow: `0 6px 20px ${activeTheme.preview.accent}45`,
-            }}
-          >
-            <span>Launch Workspace</span>
-            <ArrowRight size={16} />
-          </Link>
+
+          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              to="/dashboard"
+              className="inline-flex items-center gap-2.5 px-9 py-4 rounded-full text-sm font-bold text-white shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
+              style={{
+                background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+                boxShadow: '0 0 35px rgba(99, 102, 241, 0.5)',
+              }}
+            >
+              <span>Launch Studio Workspace</span>
+              <ArrowRight size={16} />
+            </Link>
+
+            <Link
+              to="/demo"
+              target="_blank"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-sm font-bold text-slate-200 border border-white/15 bg-white/[0.04] backdrop-blur-xl hover:bg-white/[0.08] hover:border-white/30 transition-all hover:scale-105"
+            >
+              <ExternalLink size={15} className="text-cyan-400" />
+              <span>Explore Demo</span>
+            </Link>
+          </div>
         </motion.div>
       </section>
 
       {/* ── Footer ── */}
-      <footer
-        className="mt-auto py-8 px-6 border-t text-center text-xs transition-colors duration-300"
-        style={{
-          borderColor: activeTheme.colors.border,
-          color: activeTheme.colors.text3,
-        }}
-      >
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <footer className="mt-auto py-10 px-6 border-t border-white/[0.08] bg-slate-950/80 text-center text-xs text-slate-400 relative z-20">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <FolioVitaeLogo
-              size={22}
-              showText={true}
-              textColor={activeTheme.colors.text}
-              accentColor={activeTheme.colors.accent}
-            />
-            <span>— The Elegant Portfolio Workspace</span>
+            <FolioVitaeLogo size={22} showText={true} textColor="#ffffff" accentColor="#38bdf8" />
+            <span className="text-slate-500">— Cinematic Developer Portfolio Studio</span>
           </div>
 
           <div className="flex items-center gap-6">
-            <Link to="/demo" className="hover:underline">
-              Sample Portfolio
+            <Link to="/demo" className="hover:text-slate-200 transition-colors">
+              Sample Showcase
             </Link>
-            <Link to="/dashboard" className="hover:underline font-semibold" style={{ color: activeTheme.colors.accent }}>
-              Launch Workspace
+            <Link to="/dashboard" className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors">
+              Launch Studio
             </Link>
           </div>
         </div>
