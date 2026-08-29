@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { motion } from 'motion/react';
 import { usePortfolioOptional } from '../../context/PortfolioContext';
 import { getTheme, themeToCssVars } from '../../themes/themes';
 import { generateSlug } from '../../services/storage';
@@ -421,11 +422,17 @@ export default function PortfolioDocument({ data: propData }) {
             {profile.about && (
               <section aria-labelledby="pf-about" className="relative z-[2]">
                 <SectionHeading title="About" id="pf-about" theme={theme} delay={100} />
-                <div style={{ ...cardStyle }}>
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  style={{ ...cardStyle }}
+                >
                   <p style={{ fontSize: '1.05rem', lineHeight: '1.85', color: t.text2, margin: 0 }}>
                     {profile.about}
                   </p>
-                </div>
+                </motion.div>
               </section>
             )}
 
@@ -434,8 +441,15 @@ export default function PortfolioDocument({ data: propData }) {
               <section aria-labelledby="pf-exp" className="relative z-[2]">
                 <SectionHeading title="Experience" id="pf-exp" theme={theme} delay={150} />
                 <div className="space-y-4">
-                  {experience.map((exp) => (
-                    <div key={exp.id} style={{ ...cardStyle, borderLeft: `4px solid ${t.accent}` }}>
+                  {experience.map((exp, idx) => (
+                    <motion.div
+                      key={exp.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: idx * 0.08 }}
+                      style={{ ...cardStyle, borderLeft: `4px solid ${t.accent}` }}
+                    >
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
                         <div>
                           <h3 style={{ fontFamily: displayFont, fontSize: '1.12rem', fontWeight: 600, color: t.text, margin: '0 0 3px' }}>
@@ -459,7 +473,7 @@ export default function PortfolioDocument({ data: propData }) {
                           ))}
                         </ul>
                       )}
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </section>
@@ -470,12 +484,19 @@ export default function PortfolioDocument({ data: propData }) {
               <section aria-labelledby="pf-edu" className="relative z-[2]">
                 <SectionHeading title="Education" id="pf-edu" theme={theme} delay={175} />
                 <div className="space-y-4">
-                  {education.map((edu) => {
+                  {education.map((edu, idx) => {
                     const degreeText = formatDegree(edu);
                     const dates = formatEduDates(edu);
 
                     return (
-                      <div key={edu.id} style={{ ...cardStyle, borderLeft: `4px solid ${t.accent}` }}>
+                      <motion.div
+                        key={edu.id}
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.2 }}
+                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: idx * 0.08 }}
+                        style={{ ...cardStyle, borderLeft: `4px solid ${t.accent}` }}
+                      >
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                           <div>
                             <h3 style={{ fontFamily: displayFont, fontSize: '1.12rem', fontWeight: 600, color: t.text, margin: '0 0 3px' }}>
@@ -496,7 +517,7 @@ export default function PortfolioDocument({ data: propData }) {
                             </span>
                           )}
                         </div>
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
@@ -508,12 +529,20 @@ export default function PortfolioDocument({ data: propData }) {
               <section aria-labelledby="pf-proj" className="relative z-[2]">
                 <SectionHeading title="Projects" id="pf-proj" theme={theme} delay={200} />
                 <div className="pf-masonry">
-                  {projects.map((proj) => {
+                  {projects.map((proj, idx) => {
                     const stackList = getTechList(proj.techStack);
                     const projLink = proj.link ? formatExternalUrl(proj.link) : null;
 
                     return (
-                      <article key={proj.id} className="pf-masonry-item" style={{ ...cardStyle }}>
+                      <motion.article
+                        key={proj.id}
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.15 }}
+                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: idx * 0.08 }}
+                        className="pf-masonry-item"
+                        style={{ ...cardStyle }}
+                      >
                         {proj.imageUrl && (
                           <button
                             type="button"
@@ -554,7 +583,7 @@ export default function PortfolioDocument({ data: propData }) {
                             <LinkIcon /><span>View Project →</span>
                           </a>
                         )}
-                      </article>
+                      </motion.article>
                     );
                   })}
                 </div>
@@ -566,10 +595,18 @@ export default function PortfolioDocument({ data: propData }) {
               <section aria-labelledby="pf-skills" className="relative z-[2]">
                 <SectionHeading title="Skills & Expertise" id="pf-skills" theme={theme} delay={250} />
                 <div className="flex flex-wrap gap-2.5">
-                  {skills.map((skill) => (
-                    <span key={skill} className="backdrop-blur-sm shadow-sm transition-transform hover:scale-105" style={{ fontSize: '0.92rem', fontWeight: 600, padding: '8px 16px', borderRadius: '9999px', background: t.tag.bg, color: t.tag.text, border: `1px solid ${t.tag.border}` }}>
+                  {skills.map((skill, idx) => (
+                    <motion.span
+                      key={skill}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      transition={{ duration: 0.35, delay: idx * 0.04 }}
+                      className="backdrop-blur-sm shadow-sm transition-transform hover:scale-105"
+                      style={{ fontSize: '0.92rem', fontWeight: 600, padding: '8px 16px', borderRadius: '9999px', background: t.tag.bg, color: t.tag.text, border: `1px solid ${t.tag.border}` }}
+                    >
                       {skill}
-                    </span>
+                    </motion.span>
                   ))}
                 </div>
               </section>
@@ -579,13 +616,21 @@ export default function PortfolioDocument({ data: propData }) {
               <section aria-labelledby="pf-certs" className="relative z-[2]">
                 <SectionHeading title="Certifications" id="pf-certs" theme={theme} delay={300} />
                 <div className="space-y-3.5">
-                  {certifications.map((cert) => {
+                  {certifications.map((cert, idx) => {
                     const media = cert.imageUrl || cert.fileUrl;
                     const certYear = cert.year || cert.date || '';
                     const certLink = cert.link || cert.fileUrl ? formatExternalUrl(cert.link || cert.fileUrl) : null;
 
                     return (
-                      <div key={cert.id} className="flex items-center justify-between gap-4" style={{ ...cardStyle, padding: '16px 20px' }}>
+                      <motion.div
+                        key={cert.id}
+                        initial={{ opacity: 0, y: 24 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.15 }}
+                        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: idx * 0.06 }}
+                        className="flex items-center justify-between gap-4"
+                        style={{ ...cardStyle, padding: '16px 20px' }}
+                      >
                         <div className="flex items-center gap-3.5 min-w-0">
                           {media && (
                             <button type="button" onClick={() => openGallery(normalizeImageUrl(media))} className="shrink-0" style={{ padding: 0, border: 0, background: 'transparent', cursor: 'zoom-in' }}>
@@ -610,7 +655,7 @@ export default function PortfolioDocument({ data: propData }) {
                             <LinkIcon /><span>{cert.fileUrl ? 'View' : 'Verify'}</span>
                           </a>
                         )}
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
@@ -689,11 +734,17 @@ export default function PortfolioDocument({ data: propData }) {
 
           {/* About */}
           {profile.about && (
-            <div style={{ ...cardStyle, textAlign: 'center', padding: '32px' }}>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              style={{ ...cardStyle, textAlign: 'center', padding: '32px' }}
+            >
               <p style={{ fontSize: '1.15rem', lineHeight: '1.9', color: t.text2, margin: 0 }}>
                 {profile.about}
               </p>
-            </div>
+            </motion.div>
           )}
 
           {/* Experience in Minimal */}
@@ -701,8 +752,15 @@ export default function PortfolioDocument({ data: propData }) {
             <section className="relative z-[2]">
               <SectionHeading title="Experience" id="min-exp" theme={theme} centered />
               <div className="space-y-4">
-                {experience.map((exp) => (
-                  <div key={exp.id} style={{ ...cardStyle, textAlign: 'left' }}>
+                {experience.map((exp, idx) => (
+                  <motion.div
+                    key={exp.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: idx * 0.08 }}
+                    style={{ ...cardStyle, textAlign: 'left' }}
+                  >
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
                       <div>
                         <h3 style={{ fontFamily: displayFont, fontSize: '1.15rem', fontWeight: 600, color: t.text, margin: '0 0 3px' }}>
@@ -726,7 +784,7 @@ export default function PortfolioDocument({ data: propData }) {
                         ))}
                       </ul>
                     )}
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </section>
@@ -737,11 +795,18 @@ export default function PortfolioDocument({ data: propData }) {
             <section className="relative z-[2]">
               <SectionHeading title="Education" id="min-edu" theme={theme} centered />
               <div className="space-y-4">
-                {education.map((edu) => {
+                {education.map((edu, idx) => {
                   const degreeText = formatDegree(edu);
                   const dates = formatEduDates(edu);
                   return (
-                    <div key={edu.id} style={{ ...cardStyle, textAlign: 'left' }}>
+                    <motion.div
+                      key={edu.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: idx * 0.08 }}
+                      style={{ ...cardStyle, textAlign: 'left' }}
+                    >
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                         <div>
                           <h3 style={{ fontFamily: displayFont, fontSize: '1.12rem', fontWeight: 600, color: t.text, margin: '0 0 3px' }}>
@@ -762,7 +827,7 @@ export default function PortfolioDocument({ data: propData }) {
                           </span>
                         )}
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
@@ -774,12 +839,19 @@ export default function PortfolioDocument({ data: propData }) {
             <section className="relative z-[2]">
               <SectionHeading title="Featured Work" id="min-proj" theme={theme} centered />
               <div className="space-y-8">
-                {projects.map((proj) => {
+                {projects.map((proj, idx) => {
                   const stackList = getTechList(proj.techStack);
                   const projLink = proj.link ? formatExternalUrl(proj.link) : null;
 
                   return (
-                    <article key={proj.id} style={{ ...cardStyle, textAlign: 'left' }}>
+                    <motion.article
+                      key={proj.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.15 }}
+                      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: idx * 0.08 }}
+                      style={{ ...cardStyle, textAlign: 'left' }}
+                    >
                       {proj.imageUrl && (
                         <button
                           type="button"
@@ -814,7 +886,7 @@ export default function PortfolioDocument({ data: propData }) {
                           <LinkIcon /><span>View Project →</span>
                         </a>
                       )}
-                    </article>
+                    </motion.article>
                   );
                 })}
               </div>
@@ -826,10 +898,18 @@ export default function PortfolioDocument({ data: propData }) {
             <section className="relative z-[2]">
               <SectionHeading title="Skills & Expertise" id="min-skills" theme={theme} centered />
               <div className="flex flex-wrap justify-center gap-3">
-                {skills.map((skill) => (
-                  <span key={skill} className="backdrop-blur-sm shadow-sm" style={{ fontSize: '0.95rem', fontWeight: 600, padding: '8px 20px', borderRadius: '9999px', background: t.tag.bg, color: t.tag.text, border: `1px solid ${t.tag.border}` }}>
+                {skills.map((skill, idx) => (
+                  <motion.span
+                    key={skill}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.35, delay: idx * 0.04 }}
+                    className="backdrop-blur-sm shadow-sm"
+                    style={{ fontSize: '0.95rem', fontWeight: 600, padding: '8px 20px', borderRadius: '9999px', background: t.tag.bg, color: t.tag.text, border: `1px solid ${t.tag.border}` }}
+                  >
                     {skill}
-                  </span>
+                  </motion.span>
                 ))}
               </div>
             </section>
@@ -840,12 +920,20 @@ export default function PortfolioDocument({ data: propData }) {
             <section className="relative z-[2]">
               <SectionHeading title="Certifications" id="min-certs" theme={theme} centered />
               <div className="space-y-3.5">
-                {certifications.map((cert) => {
+                {certifications.map((cert, idx) => {
                   const media = cert.imageUrl || cert.fileUrl;
                   const certYear = cert.year || cert.date || '';
                   const certLink = cert.link || cert.fileUrl ? formatExternalUrl(cert.link || cert.fileUrl) : null;
                   return (
-                    <div key={cert.id} className="flex items-center justify-between gap-4 text-left" style={{ ...cardStyle, padding: '16px 20px' }}>
+                    <motion.div
+                      key={cert.id}
+                      initial={{ opacity: 0, y: 24 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.15 }}
+                      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: idx * 0.06 }}
+                      className="flex items-center justify-between gap-4 text-left"
+                      style={{ ...cardStyle, padding: '16px 20px' }}
+                    >
                       <div className="flex items-center gap-3.5 min-w-0">
                         {media && (
                           <button type="button" onClick={() => openGallery(normalizeImageUrl(media))} className="shrink-0" style={{ padding: 0, border: 0, background: 'transparent', cursor: 'zoom-in' }}>
@@ -866,7 +954,7 @@ export default function PortfolioDocument({ data: propData }) {
                           <LinkIcon /><span>{cert.fileUrl ? 'View' : 'Verify'}</span>
                         </a>
                       )}
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
@@ -881,7 +969,11 @@ export default function PortfolioDocument({ data: propData }) {
       {layout === 'bento' && (
         <div className="max-w-6xl mx-auto px-3 sm:px-6 md:px-8 py-6 sm:py-12 md:py-14 space-y-4 sm:space-y-6 relative z-[2]">
           {/* Bento Header Anchor Card (Spans Full) */}
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className={`p-5 sm:p-7 md:p-9 rounded-2xl sm:rounded-3xl backdrop-blur-md transition-all relative overflow-hidden ${
               isAvatarCenter
                 ? 'flex flex-col items-center text-center gap-6'
@@ -1002,22 +1094,33 @@ export default function PortfolioDocument({ data: propData }) {
                 />
               </div>
             )}
-          </div>
+          </motion.div>
 
           {/* Bento Asymmetric Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-[2]">
             {/* Bento Card 1: Featured Projects (Spans 2 Columns) */}
             {projects.length > 0 && (
-              <div className="md:col-span-2 space-y-4" style={{ ...cardStyle }}>
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
+                className="md:col-span-2 space-y-4"
+                style={{ ...cardStyle }}
+              >
                 <SectionHeading title="Featured Projects" id="bento-proj" theme={theme} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {projects.map((proj) => {
+                  {projects.map((proj, idx) => {
                     const stackList = getTechList(proj.techStack);
                     const projLink = proj.link ? formatExternalUrl(proj.link) : null;
 
                     return (
-                      <div
+                      <motion.div
                         key={proj.id}
+                        initial={{ opacity: 0, y: 24 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.15 }}
+                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 + idx * 0.06 }}
                         className="p-4 rounded-xl transition-all duration-200 flex flex-col justify-between bg-slate-900 border border-slate-700/60 shadow-lg hover:border-slate-600 hover:shadow-xl"
                       >
                         <div>
@@ -1069,21 +1172,32 @@ export default function PortfolioDocument({ data: propData }) {
                             <span aria-hidden="true">→</span>
                           </a>
                         )}
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Bento Card 2: Technical Skills (Spans 1 Column) */}
             {skills.length > 0 && (
-              <div className="space-y-4" style={{ ...cardStyle }}>
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.16 }}
+                className="space-y-4"
+                style={{ ...cardStyle }}
+              >
                 <SectionHeading title="Core Skills" id="bento-skills" theme={theme} />
                 <div className="flex flex-wrap gap-2">
-                  {skills.map((skill) => (
-                    <span
+                  {skills.map((skill, idx) => (
+                    <motion.span
                       key={skill}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true, amount: 0.15 }}
+                      transition={{ duration: 0.35, delay: 0.2 + idx * 0.03 }}
                       className="backdrop-blur-sm shadow-xs"
                       style={{
                         fontSize: '0.84rem',
@@ -1096,19 +1210,34 @@ export default function PortfolioDocument({ data: propData }) {
                       }}
                     >
                       {skill}
-                    </span>
+                    </motion.span>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Bento Card 3: Experience & Roles (Spans 2 Columns) */}
             {experience.length > 0 && (
-              <div className={`${education.length > 0 ? 'md:col-span-2' : 'md:col-span-3'} space-y-4`} style={{ ...cardStyle }}>
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.12 }}
+                className={`${education.length > 0 ? 'md:col-span-2' : 'md:col-span-3'} space-y-4`}
+                style={{ ...cardStyle }}
+              >
                 <SectionHeading title="Experience" id="bento-exp" theme={theme} />
                 <div className="space-y-3">
-                  {experience.map((exp) => (
-                    <div key={exp.id} className="pb-3 border-b last:border-b-0" style={{ borderColor: t.border }}>
+                  {experience.map((exp, idx) => (
+                    <motion.div
+                      key={exp.id}
+                      initial={{ opacity: 0, y: 18 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.15 }}
+                      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 0.15 + idx * 0.05 }}
+                      className="pb-3 border-b last:border-b-0"
+                      style={{ borderColor: t.border }}
+                    >
                       <div className="flex items-center justify-between gap-2">
                         <h4 style={{ fontFamily: displayFont, fontWeight: 700, fontSize: '1rem', color: t.text, margin: 0 }}>
                           {exp.role} <span style={{ color: t.accent, fontWeight: 500 }}>@ {exp.company}</span>
@@ -1122,22 +1251,37 @@ export default function PortfolioDocument({ data: propData }) {
                           {exp.responsibilities}
                         </p>
                       )}
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Bento Card 4: Education & Degrees */}
             {education.length > 0 && (
-              <div className={`${experience.length > 0 ? 'md:col-span-1' : 'md:col-span-2'} space-y-4`} style={{ ...cardStyle }}>
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                className={`${experience.length > 0 ? 'md:col-span-1' : 'md:col-span-2'} space-y-4`}
+                style={{ ...cardStyle }}
+              >
                 <SectionHeading title="Education" id="bento-edu" theme={theme} />
                 <div className="space-y-3">
-                  {education.map((edu) => {
+                  {education.map((edu, idx) => {
                     const degreeText = formatDegree(edu);
                     const dates = formatEduDates(edu);
                     return (
-                      <div key={edu.id} className="pb-3 border-b last:border-b-0" style={{ borderColor: t.border }}>
+                      <motion.div
+                        key={edu.id}
+                        initial={{ opacity: 0, y: 18 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.15 }}
+                        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 0.2 + idx * 0.05 }}
+                        className="pb-3 border-b last:border-b-0"
+                        style={{ borderColor: t.border }}
+                      >
                         <h4 style={{ fontFamily: displayFont, fontWeight: 700, fontSize: '0.95rem', color: t.text, margin: '0 0 2px' }}>
                           {degreeText}
                         </h4>
@@ -1156,25 +1300,40 @@ export default function PortfolioDocument({ data: propData }) {
                             <span style={{ fontWeight: 600, color: t.text2 }}>GPA:</span> {edu.gpa}
                           </p>
                         )}
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Bento Card 5: Certifications & Credentials */}
             {certifications.length > 0 && (
-              <div className="md:col-span-3 space-y-4" style={{ ...cardStyle }}>
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.18 }}
+                className="md:col-span-3 space-y-4"
+                style={{ ...cardStyle }}
+              >
                 <SectionHeading title="Certifications & Credentials" id="bento-certs" theme={theme} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {certifications.map((cert) => {
+                  {certifications.map((cert, idx) => {
                     const media = cert.imageUrl || cert.fileUrl;
                     const certYear = cert.year || cert.date || '';
                     const certLink = cert.link || cert.fileUrl ? formatExternalUrl(cert.link || cert.fileUrl) : null;
 
                     return (
-                      <div key={cert.id} className="p-3.5 rounded-xl flex items-center justify-between gap-3" style={{ background: 'rgba(255,255,255,0.4)', border: `1px solid ${t.border}` }}>
+                      <motion.div
+                        key={cert.id}
+                        initial={{ opacity: 0, y: 18 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.15 }}
+                        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 0.2 + idx * 0.04 }}
+                        className="p-3.5 rounded-xl flex items-center justify-between gap-3"
+                        style={{ background: 'rgba(255,255,255,0.4)', border: `1px solid ${t.border}` }}
+                      >
                         <div className="flex items-center gap-3 min-w-0">
                           {media && (
                             <button type="button" onClick={() => openGallery(normalizeImageUrl(media))} className="shrink-0" style={{ padding: 0, border: 0, background: 'transparent', cursor: 'zoom-in' }}>
@@ -1197,11 +1356,11 @@ export default function PortfolioDocument({ data: propData }) {
                             ↗
                           </a>
                         )}
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
-              </div>
+              </motion.div>
             )}
           </div>
         </div>

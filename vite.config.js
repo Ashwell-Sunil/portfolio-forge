@@ -26,6 +26,9 @@ export default defineConfig({
           },
         ],
       },
+      workbox: {
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+      },
       devOptions: { enabled: true, type: 'module' },
     }),
     viteSingleFile(), // inlines all JS + CSS into one index.html
