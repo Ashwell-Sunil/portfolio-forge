@@ -2,14 +2,12 @@ import React from 'react';
 
 /**
  * Spotlight
- * Aceternity-style dynamic glowing spotlight SVG beam
+ * Minimal subtle monochrome light beam
  */
 export default function Spotlight({
   className = '',
-  fill = '#6366f1',
-  opacity = 0.28,
-  width = 600,
-  height = 800,
+  fill = '#ffffff',
+  opacity = 0.04,
 }) {
   return (
     <svg

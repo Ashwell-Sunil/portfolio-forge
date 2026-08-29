@@ -4,144 +4,111 @@ import { motion } from 'motion/react';
 import { Sparkles, ArrowRight, ExternalLink, Code2, Cpu, ShieldCheck } from 'lucide-react';
 import Spotlight from './ui/Spotlight';
 import TextReveal from './ui/TextReveal';
-import Hero3D from './Hero3D';
 
 /**
  * HeroCinematic
- * Screen-filling, ultra-premium cinematic Hero with Spotlight, Aurora, Word-by-word reveal, and 3D Canvas
+ * Minimal, elegant, and cinematic Hero section with sharp typography and frosted glass styling
  */
 export default function HeroCinematic({
-  title = 'Build Your Cinematic Developer Portfolio',
-  highlightWords = ['Cinematic', 'Portfolio', 'Minutes'],
-  subtitle = 'An architectural workspace crafted for elite engineers. Create stunning 3D parallax showcases, glassmorphism layouts, and publish live with sub-second performance.',
-  accentColor = '#6366f1',
+  title = 'Craft Your Minimal Developer Portfolio',
+  highlightWords = ['Developer', 'Portfolio'],
+  subtitle = 'A refined workspace designed for software engineers. Build minimalist bento grid showcases, frosted glass cards, and publish live with instant edge speed.',
   primaryCtaText = 'Launch Workspace',
   primaryCtaLink = '/dashboard',
-  secondaryCtaText = 'Explore Sample',
+  secondaryCtaText = 'Explore Demo',
   secondaryCtaLink = '/demo',
 }) {
   return (
-    <div className="relative min-h-[90vh] sm:min-h-screen w-full flex flex-col items-center justify-center pt-20 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* ── Dynamic Glowing Spotlight Beams ── */}
-      <Spotlight className="-top-40 left-0 md:left-60 md:-top-20" fill={accentColor} opacity={0.32} />
-      <Spotlight className="top-10 -right-20 md:right-10" fill="#a855f7" opacity={0.22} />
+    <div className="relative min-h-[75vh] sm:min-h-[85vh] w-full flex flex-col items-center justify-center pt-24 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* ── Subtle Monochrome Spotlight ── */}
+      <Spotlight className="-top-32 left-1/2 -translate-x-1/2" fill="#ffffff" opacity={0.04} />
 
-      {/* ── Background Aurora Light Mesh ── */}
+      {/* ── Subtle Radial Vignette ── */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-40 blur-[100px]"
+        className="pointer-events-none absolute inset-0 opacity-20"
         style={{
-          backgroundImage: `
-            radial-gradient(ellipse 60% 45% at 50% 10%, ${accentColor} 0%, transparent 60%),
-            radial-gradient(ellipse 40% 30% at 20% 40%, #06b6d4 0%, transparent 50%),
-            radial-gradient(ellipse 50% 35% at 80% 50%, #9333ea 0%, transparent 55%)
-          `,
-        }}
-      />
-
-      {/* ── Background Grid Accent Lines ── */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-15"
-        style={{
-          backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)`,
-          backgroundSize: '4rem 4rem',
-          maskImage: 'radial-gradient(ellipse 60% 50% at 50% 50%, black 40%, transparent 100%)',
+          backgroundImage: 'radial-gradient(circle at 50% 30%, rgba(255,255,255,0.08) 0%, transparent 60%)',
         }}
       />
 
       {/* ── Content Container ── */}
-      <div className="relative z-10 max-w-5xl mx-auto flex flex-col items-center text-center space-y-6 sm:space-y-8">
-        {/* Glowing Badge */}
+      <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center text-center space-y-6 sm:space-y-8">
+        {/* Minimal Badge */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.88, y: -10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-slate-200 border border-white/15 bg-white/[0.04] backdrop-blur-xl shadow-[0_0_20px_rgba(99,102,241,0.25)] hover:border-white/30 transition-all cursor-default"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium tracking-wide text-neutral-300 border border-white/10 bg-white/[0.03] backdrop-blur-md hover:border-white/20 transition-all cursor-default"
         >
-          <Sparkles size={14} className="text-cyan-400 animate-pulse" />
-          <span>Ultra-Premium 3D Architecture</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+          <Sparkles size={13} className="text-neutral-400" />
+          <span>Minimalist Studio & Bento Architecture</span>
         </motion.div>
 
-        {/* 3D Interactive Floating Mesh Canvas */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-sm sm:max-w-md md:max-w-lg -my-4 sm:-my-6 pointer-events-none sm:pointer-events-auto"
-        >
-          <Hero3D accentColor={accentColor} />
-        </motion.div>
-
-        {/* Staggered Word-by-Word Headline Reveal */}
-        <div className="max-w-4xl">
+        {/* Staggered Word-by-Word Headline */}
+        <div className="max-w-3xl">
           <TextReveal
             text={title}
             highlightWords={highlightWords}
-            highlightColor="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400"
-            className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white leading-[1.1]"
-            delay={0.2}
-            staggerDuration={0.06}
+            highlightColor="text-white font-extrabold"
+            className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white leading-[1.12]"
+            delay={0.15}
+            staggerDuration={0.05}
           />
         </div>
 
         {/* Subtitle */}
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="text-base sm:text-lg md:text-xl text-slate-300/80 max-w-2xl mx-auto leading-relaxed font-normal"
+          transition={{ duration: 0.5, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="text-base sm:text-lg text-neutral-400 max-w-xl mx-auto leading-relaxed font-normal"
         >
           {subtitle}
         </motion.p>
 
-        {/* Hero Call-To-Action Buttons */}
+        {/* Clean Action Buttons */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 w-full sm:w-auto"
+          transition={{ duration: 0.5, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2 w-full sm:w-auto"
         >
           <Link
             to={primaryCtaLink}
-            className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full text-sm font-bold text-white shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden w-full sm:w-auto"
-            style={{
-              background: `linear-gradient(135deg, ${accentColor} 0%, #7c3aed 100%)`,
-              boxShadow: `0 0 35px ${accentColor}60, 0 10px 25px rgba(0,0,0,0.5)`,
-            }}
+            className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full text-xs sm:text-sm font-semibold text-black bg-white hover:bg-neutral-200 shadow-md transition-all duration-200 hover:scale-102 active:scale-98 w-full sm:w-auto"
           >
-            <span className="relative z-10">{primaryCtaText}</span>
-            <ArrowRight size={16} className="relative z-10 group-hover:translate-x-1 transition-transform" />
-            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+            <span>{primaryCtaText}</span>
+            <ArrowRight size={15} />
           </Link>
 
           <Link
             to={secondaryCtaLink}
             target="_blank"
-            className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full text-sm font-bold text-slate-200 border border-white/15 bg-white/[0.04] backdrop-blur-xl hover:bg-white/[0.08] hover:border-white/30 transition-all hover:scale-105 active:scale-95 w-full sm:w-auto shadow-lg"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs sm:text-sm font-semibold text-neutral-300 border border-white/10 bg-white/[0.03] backdrop-blur-md hover:bg-white/[0.07] hover:border-white/20 transition-all hover:scale-102 active:scale-98 w-full sm:w-auto"
           >
-            <ExternalLink size={15} className="text-cyan-400" />
             <span>{secondaryCtaText}</span>
+            <ExternalLink size={14} className="text-neutral-400" />
           </Link>
         </motion.div>
 
-        {/* Quick Feature Badges Cluster */}
+        {/* Feature Points */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.75 }}
-          className="pt-6 sm:pt-8 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs text-slate-400"
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="pt-6 flex flex-wrap items-center justify-center gap-6 text-xs text-neutral-500 font-medium"
         >
-          <div className="flex items-center gap-2">
-            <Code2 size={15} className="text-cyan-400" />
-            <span>3D Physics & Parallax</span>
+          <div className="flex items-center gap-1.5">
+            <Code2 size={14} className="text-neutral-400" />
+            <span>Minimal Bento Grid</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Cpu size={15} className="text-indigo-400" />
-            <span>Inertia Smooth Scroll</span>
+          <div className="flex items-center gap-1.5">
+            <Cpu size={14} className="text-neutral-400" />
+            <span>Lenis Smooth Scroll</span>
           </div>
-          <div className="flex items-center gap-2">
-            <ShieldCheck size={15} className="text-emerald-400" />
-            <span>Zero Data Loss Guarantee</span>
+          <div className="flex items-center gap-1.5">
+            <ShieldCheck size={14} className="text-neutral-400" />
+            <span>Zero Data Loss</span>
           </div>
         </motion.div>
       </div>
